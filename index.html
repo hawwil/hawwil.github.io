@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1c2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="حوّل">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>حوّل</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#0f1c2e; --muted:#5f6f82; --line:#dde3ea;
+  --yellow:#ffc20e; --on-yellow:#0f1c2e; --meter:#0f1c2e; --meter-text:#ffc20e;
+  --err:#c0362c; --warn-bg:#fff4d6; --warn:#6b4a00; --track:#e6ebf0; --shadow:0 1px 2px rgba(15,28,46,.08),0 4px 14px rgba(15,28,46,.06);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a121d; --surface:#121f30; --ink:#eaf0f7; --muted:#93a3b8; --line:#243449;
+    --meter:#050a11; --err:#ff8f85; --warn-bg:#3a2e0b; --warn:#f3d98a; --track:#1b2b40; --shadow:none;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a121d; --surface:#121f30; --ink:#eaf0f7; --muted:#93a3b8; --line:#243449;
+  --meter:#050a11; --err:#ff8f85; --warn-bg:#3a2e0b; --warn:#f3d98a; --track:#1b2b40; --shadow:none;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;font-size:16px;line-height:1.55}
+.app{max-width:440px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:"Cairo","Tajawal",sans-serif;font-weight:800;font-size:20px}
+.mark{width:34px;height:34px;border-radius:10px;background:var(--yellow);color:var(--on-yellow);display:grid;place-items:center;font-size:18px;font-weight:800}
+.tools{display:flex;align-items:center;gap:8px}
+.theme{width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.lang{height:36px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:"Cairo",sans-serif;font-weight:700;font-size:13px;cursor:pointer}
+:root[dir="ltr"] .field input{text-align:left}
+:root[dir="ltr"] .row b{text-align:right}
+.credit{margin-top:auto;text-align:center;font-size:12px;color:var(--muted);padding:8px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.warn[hidden],.hist[hidden],.cbtn[hidden]{display:none}
+.warn.big{background:var(--err);color:#fff;font-weight:700}
+:root[data-theme="dark"] .warn.big{color:#2a0a07}
+.hist{margin-top:22px}
+.hist-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.link{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:8px 4px;text-decoration:underline}
+.hitem{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:8px;font:inherit;color:var(--ink);cursor:pointer;text-align:start;box-shadow:var(--shadow)}
+.hitem b{display:block;font-family:"Cairo",sans-serif;font-size:16px;direction:ltr;text-align:right}
+:root[dir="ltr"] .hitem b{text-align:left}
+.hitem span{display:block;font-size:12px;color:var(--muted)}
+.again{font-style:normal;font-size:12px;font-weight:700;background:var(--track);border-radius:10px;padding:6px 10px;flex:none}
+.help-title{font-family:"Cairo",sans-serif;font-size:22px;margin:4px 0 0}
+.hsec{font-size:13px;font-weight:700;color:var(--muted);margin:20px 0 8px}
+.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;font-size:15px}
+.steps li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--yellow);color:var(--on-yellow);font-family:"Cairo",sans-serif;font-weight:800;display:grid;place-items:center;font-size:14px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 14px;margin-bottom:8px}
+summary{padding:12px 0;font-weight:700;cursor:pointer;list-style:none;font-size:15px}
+summary::-webkit-details-marker{display:none}
+details p{margin:0 0 12px;color:var(--muted);font-size:14px}
+.cbtn{display:block;width:100%;text-align:center;text-decoration:none;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:12px;font-family:inherit;font-weight:700;font-size:16px;margin-top:10px;cursor:pointer;min-height:48px}
+.onb{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.onb[hidden]{display:none}
+.onb-card{width:100%;max-width:400px;text-align:center}
+.onb-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px}
+.onb-ico{width:96px;height:96px;border-radius:28px;background:var(--yellow);color:var(--on-yellow);display:grid;place-items:center;margin:0 auto 24px}
+.onb h2{font-family:"Cairo",sans-serif;font-size:24px;margin:0 0 8px}
+.onb p{color:var(--muted);margin:0 auto 24px;max-width:320px}
+.dots{display:flex;gap:6px;justify-content:center;margin-bottom:24px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dot.on{width:22px;border-radius:4px;background:var(--ink)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--track);border-radius:14px;padding:4px;gap:4px;margin:0 16px 10px}
+.tabs[hidden]{display:none}
+.tabs button{background:transparent;color:var(--muted);border:0;border-radius:10px;padding:10px 6px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;min-height:44px}
+.tabs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.empty{text-align:center;color:var(--muted);padding:36px 16px}
+.empty[hidden]{display:none}
+.credit a{color:var(--ink);font-weight:800;text-decoration:none;border-bottom:1.5px solid var(--yellow)}
+.cbtn.ig{display:flex;align-items:center;justify-content:center;gap:12px}
+.cbtn.ig span:last-child{text-align:start;line-height:1.3}
+.cbtn.ig small{display:block;font-weight:500;color:var(--muted);font-size:12px;direction:ltr}
+.ig-ico{width:38px;height:38px;border-radius:11px;background:linear-gradient(45deg,#f9ce34,#ee2a7b 55%,#6228d7);color:#fff;display:grid;place-items:center;flex:none}
+.filters[hidden]{display:none}
+.filters{display:flex;gap:8px;margin-bottom:12px}
+.chip{flex:1;display:grid;place-items:center;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:12px;min-height:44px;padding:0 8px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;text-align:center}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dpick{position:relative;overflow:hidden;flex:1.4}
+.dpick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+.sumline{margin:0 0 12px;font-size:13px;font-weight:700;color:var(--muted)}
+.sumline[hidden]{display:none}
+.banner{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:12px}
+.banner[hidden]{display:none}
+.banner .link{color:inherit;flex:none}
+.toast{position:fixed;inset-inline:16px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:40;max-width:408px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:700;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast[hidden]{display:none}
+.simhelp{margin:0 0 10px;font-size:13px;color:var(--muted)}
+.range{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:-4px 0 12px}
+.range[hidden]{display:none}
+.range label{display:block;font-size:12px;font-weight:700;color:var(--muted)}
+.range input{display:block;width:100%;margin-top:4px;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:10px;font-family:"Cairo",sans-serif;font-size:15px;min-height:44px}
+.sumcard{background:var(--meter);border-radius:18px;padding:14px 18px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.sumcard[hidden]{display:none}
+.sum-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;color:#9fb0c4}
+.sum-val{display:flex;align-items:baseline;gap:8px;direction:ltr;justify-content:center;color:var(--meter-text);font-family:"Cairo",sans-serif;font-weight:800;margin-top:4px}
+.sum-val span{font-size:48px;line-height:1.2;font-variant-numeric:tabular-nums}
+.sum-val small{font-size:22px}
+.sumskip{margin:-4px 2px 12px;font-size:12px;color:var(--muted)}
+.sumskip[hidden]{display:none}
+.note[hidden]{display:none}
+.dlg{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);display:flex;padding:16px}
+.dlg[hidden]{display:none}
+.dlg-card{background:var(--surface);color:var(--ink);border-radius:20px;padding:22px 20px 20px;width:100%;max-width:400px;margin:auto;text-align:center}
+.dlg-card h2{font-family:"Cairo",sans-serif;font-size:20px;margin:0 0 8px}
+.dlg-card p{margin:0 0 20px;color:var(--muted);font-size:15px}
+.go.danger{background:var(--err);color:#fff}
+:root[data-theme="dark"] .go.danger{color:#2a0a07}
+.offline{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--surface)}
+main{flex:1;padding:4px 16px 0}
+.panel{display:none}.panel.on{display:block}
+.lbl{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:28px 0 10px}
+#form>.lbl:first-child{margin-top:4px}
+
+/* Segmented */
+.pick,.seg{display:grid;background:var(--track);border-radius:14px;padding:4px;gap:4px}
+.pick{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pick button,.seg button{background:transparent;color:var(--muted);border:0;border-radius:10px;padding:10px 6px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;min-height:44px}
+.pick button[aria-pressed="true"],.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+/* Methods */
+.methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.m{position:relative;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:16px;padding:14px 4px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+.m img{display:block;width:52px;height:52px;border-radius:13px;margin:0 auto 8px;object-fit:cover}
+.m[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
+.m[aria-pressed="true"]::after{content:"";position:absolute;top:8px;inset-inline-start:8px;width:10px;height:10px;border-radius:50%;background:var(--yellow);border:2px solid var(--ink)}
+.m[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+.m small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+
+/* Inputs */
+.field{display:flex;align-items:center;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:0 14px}
+.field:focus-within{border-color:var(--ink)}
+.field svg{flex:none;color:var(--muted)}
+.field input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-family:"Cairo",sans-serif;font-weight:700;font-size:20px;padding:14px 10px;direction:ltr;text-align:right;letter-spacing:.5px;outline:none}
+.field input::placeholder{color:var(--muted);opacity:.55;font-weight:600}
+
+/* Meter */
+.meter{background:var(--meter);border-radius:18px;padding:14px 16px 12px;box-shadow:var(--shadow)}
+.meter-head{display:flex;justify-content:space-between;font-size:12px;color:#9fb0c4;font-weight:700}
+.meter input{width:100%;background:transparent;border:0;outline:none;color:var(--meter-text);font-family:"Cairo",sans-serif;font-weight:800;font-size:56px;line-height:1.15;text-align:center;direction:ltr;padding:6px 0;font-variant-numeric:tabular-nums}
+.mval{position:relative}
+.zero{position:absolute;inset:0;display:grid;place-items:center;font-family:"Cairo",sans-serif;font-weight:800;font-size:56px;color:var(--meter-text);opacity:.4;pointer-events:none}
+
+.err{color:var(--err);font-size:13px;font-weight:500;margin:6px 2px 0;min-height:0}
+.err:empty{display:none}
+.warn{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:10px 14px;font-size:14px;margin:16px 0 0}
+
+/* CTA */
+.cta{padding:20px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.go{width:100%;background:var(--yellow);color:var(--on-yellow);border:0;border-radius:14px;padding:12px;font-family:"Cairo",sans-serif;font-size:17px;font-weight:700;cursor:pointer;min-height:48px}
+.go:active{transform:translateY(1px)}
+.hint{text-align:center;font-size:12px;color:var(--muted);margin:10px 0 0}
+.ghost{width:100%;background:transparent;color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:13px;font:inherit;font-weight:700;font-size:16px;cursor:pointer;min-height:48px}
+button:focus-visible,a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+input:focus,input:focus-visible{outline:none}
+
+/* Receipt */
+.receipt{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);position:relative;margin-top:6px;overflow:hidden}
+.r-top{padding:22px 20px 18px;text-align:center}
+.r-kicker{font-size:13px;color:var(--muted);font-weight:700;margin:0}
+.r-amount{font-family:"Cairo",sans-serif;font-weight:800;font-size:46px;line-height:1.2;margin:4px 0 0}
+.tear{position:relative;border-top:2px dashed var(--line);margin:0 16px}
+.tear::before,.tear::after{content:"";position:absolute;top:-11px;width:20px;height:20px;border-radius:50%;background:var(--bg)}
+.tear::before{inset-inline-start:-26px}.tear::after{inset-inline-end:-26px}
+.r-rows{padding:8px 20px 14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row span{color:var(--muted);font-size:14px}
+.row b{font-family:"Cairo","Tajawal",sans-serif;font-size:16px;unicode-bidi:plaintext;text-align:left}
+.dial{display:block;text-align:center;text-decoration:none;background:var(--yellow);color:var(--on-yellow);border-radius:14px;padding:12px;font-family:"Cairo",sans-serif;font-size:17px;font-weight:700;margin-top:16px;min-height:48px}
+.codebox[hidden]{display:none}
+.codebox{display:flex;align-items:center;gap:8px;margin-top:12px;background:var(--surface);border:1.5px dashed var(--line);border-radius:14px;padding:6px 6px 6px 12px}
+.code{flex:1;direction:ltr;text-align:left;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:16px;word-break:break-all;color:var(--ink)}
+.copy{flex:none;background:var(--track);color:var(--ink);border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;min-height:44px}
+.note{font-size:12px;color:var(--muted);text-align:center;margin:10px 0 0}
+.back{padding:12px 0 calc(20px + env(safe-area-inset-bottom,0px))}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-4-4"/><path d="M20 16H6l4 4"/></svg></span><span data-i18n="brand">حوّل</span></div>
+    <div class="tools"><button class="lang" id="lang" type="button">EN</button><button class="theme" id="theme" type="button" data-i18n-aria="themeAria" aria-label="تبديل العرض نهاري أو ليلي"></button><button class="theme" id="helpBtn" type="button" data-i18n-aria="help" aria-label="مساعدة"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7"/><path d="M12 17h.01"/></svg></button></div>
+  </header>
+  <nav class="tabs" id="tabs"><button type="button" id="tabForm" aria-pressed="true" data-i18n="tabSend">تحويل</button><button type="button" id="tabHist" aria-pressed="false" data-i18n="tabHist">تحويلاتي</button></nav>
+
+  <main>
+    <section id="form" class="panel on">
+      <span class="lbl" data-i18n="payTo">بدك تدفع إلى</span>
+      <div class="pick" id="pick">
+        <button type="button" data-to="driver" data-i18n="driver" aria-pressed="true">سائق</button>
+        <button type="button" data-to="merchant" data-i18n="merchant" aria-pressed="false">تاجر</button>
+        <button type="button" data-to="friend" data-i18n="friend" aria-pressed="false">صديق</button>
+      </div>
+
+      <span class="lbl" data-i18n="payMethod">وسيلة الدفع</span>
+      <div class="methods" id="methods">
+        <button class="m" type="button" data-id="jawwal" aria-pressed="false"><img src="data:image/webp;base64,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" alt=""><span data-i18n="m_jawwal">جوال باي</span></button>
+        <button class="m" type="button" data-id="palpay" aria-pressed="false"><img src="data:image/webp;base64,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" alt=""><span data-i18n="m_palpay">بال باي</span></button>
+      </div>
+      <p class="err" id="e-method"></p>
+
+      <div id="simBox" style="display:none">
+        <span class="lbl" data-i18n="simLbl" style="margin-bottom:4px">شريحتك</span>
+        <p class="simhelp" data-i18n="simHelp">اختار نوع الشريحة اللي مفعّل عليها جوال باي.</p>
+        <div class="seg">
+          <button type="button" data-sim="jawwal" data-i18n="simJ" aria-pressed="true">شريحة جوال</button>
+          <button type="button" data-sim="ooredoo" data-i18n="simO" aria-pressed="false">شريحة أوريدو</button>
+        </div>
+      </div>
+
+      <div id="fields">
+        <label class="lbl" for="phone" id="phoneLbl">رقم جوال السائق</label>
+        <div class="field">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
+          <input id="phone" type="tel" inputmode="numeric" maxlength="12" placeholder="05X XXX XXXX" autocomplete="off">
+        </div>
+        <p class="err" id="e-phone"></p>
+
+        <span class="lbl" data-i18n="amountLbl">المبلغ</span>
+        <div class="meter">
+          <div class="meter-head"><span data-i18n="amountShekel">المبلغ بالشيكل</span><span>₪</span></div>
+          <div class="mval"><input id="amount" type="text" inputmode="decimal" autocomplete="off" data-i18n-aria="amountShekel" aria-label="المبلغ بالشيكل"><span class="zero" id="zero" aria-hidden="true">0</span></div>
+        </div>
+        <p class="err" id="e-amount"></p>
+      </div>
+      <p class="warn" id="mNote" data-i18n="merchantNote" style="display:none">الدفع لتاجر بجوال باي بيطلب الرمز السري قبل رقم التاجر، فما بنقدر نكتب الرقم والمبلغ مسبقاً. بعد ما يفتح الاتصال: اكتب رمزك السري، وبعدين رقم التاجر والمبلغ.</p>
+    </section>
+
+    <section id="confirm" class="panel">
+      <div class="receipt">
+        <div class="r-top">
+          <p class="r-kicker" data-i18n="sending">بدك تحوّل</p>
+          <p class="r-amount" id="c-amount"></p>
+        </div>
+        <div class="tear"></div>
+        <div class="r-rows">
+          <div class="row"><span data-i18n="via">عن طريق</span><b id="c-method"></b></div>
+          <div class="row"><span data-i18n="toNumber">إلى الرقم</span><b id="c-phone"></b></div>
+        </div>
+      </div>
+      <p class="warn big" id="bigWarn" data-i18n="bigWarn" hidden>المبلغ كبير. تأكد إنك ما أضفت صفر زيادة.</p>
+      <p class="warn" data-i18n="confirmWarn">تأكد من الرقم والمبلغ، التحويل ما بيرجع.</p>
+      <a class="dial" id="dial" href="#" target="_top" rel="noopener" data-i18n="confirmCall">تأكيد واتصال</a>
+      <div class="codebox" id="codebox" hidden>
+        <div class="code" id="code"></div>
+        <button class="copy" id="copy" type="button" data-i18n="copyBtn">نسخ</button>
+      </div>
+      <p class="note" id="iosNote" data-i18n="iosNote" hidden>على الآيفون: انسخ الكود، وافتح تطبيق الهاتف، والصقه واتصل.</p>
+      
+    </section>
+
+    <section id="histPanel" class="panel">
+      <div class="hist-head"><h2 class="help-title" data-i18n="tabHist">تحويلاتي</h2><button class="link" id="histClear" type="button" data-i18n="clear" hidden>مسح</button></div>
+      <p class="note" data-i18n="histNote" style="text-align:start;margin:6px 0 14px">هون بتظهر التحويلات اللي فتحت اتصالها. تأكد من رسالة الشركة إنه التحويل تم.</p>
+      <div class="banner" id="purgeBanner" hidden><span id="purgeText"></span><button class="link" id="purgeOk" type="button" data-i18n="ok">تمام</button></div>
+      <div class="filters" id="filters">
+        <button class="chip" type="button" data-f="all" aria-pressed="true" data-i18n="fAll">الكل</button>
+        <button class="chip" type="button" data-f="today" aria-pressed="false" data-i18n="fToday">اليوم</button>
+        <button class="chip" type="button" data-f="range" aria-pressed="false" data-i18n="fRange">فترة محددة</button>
+      </div>
+      <div class="range" id="rangeRow" hidden>
+        <label><span data-i18n="fFrom">من</span><input type="date" id="dFrom"></label>
+        <label><span data-i18n="fTo">إلى</span><input type="date" id="dTo"></label>
+      </div>
+      <div class="sumcard" id="sumCard" hidden>
+        <div class="sum-top"><span id="sumPeriod"></span><span id="sumCount"></span></div>
+        <div class="sum-val"><span id="sumVal">0</span><small>₪</small></div>
+      </div>
+      <p class="sumskip" id="sumSkip" hidden></p>
+      <div id="histList"></div>
+      <p class="empty" id="histEmpty" data-i18n="histEmpty" hidden>ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هون.</p>
+    </section>
+
+    <section id="help" class="panel">
+      <h2 class="help-title" data-i18n="help">مساعدة</h2>
+      <p class="hsec" data-i18n="helpHow">كيف يشتغل؟</p>
+      <ol class="steps">
+        <li data-i18n="h1">اختار وسيلة الدفع واكتب رقم المستلم والمبلغ.</li>
+        <li data-i18n="h2">اضغط "تابع" وراجع التفاصيل، وبعدين "تأكيد واتصال".</li>
+        <li data-i18n="h3">بتفتح شاشة الاتصال والكود جاهز. اضغط اتصال، وبعدين اكتب رمزك السري بشاشة الشركة.</li>
+      </ol>
+      <p class="hsec" data-i18n="helpFaq">أسئلة شائعة</p>
+      <details><summary data-i18n="q1">q1</summary><p data-i18n="a1">a1</p></details>
+      <details><summary data-i18n="q2">q2</summary><p data-i18n="a2">a2</p></details>
+      <details><summary data-i18n="q3">q3</summary><p data-i18n="a3">a3</p></details>
+      <details><summary data-i18n="q4">q4</summary><p data-i18n="a4">a4</p></details>
+      <details><summary data-i18n="q5">q5</summary><p data-i18n="a5">a5</p></details>
+      <a class="cbtn ig" id="contact" href="#" target="_blank" rel="noopener"><span class="ig-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></span><span><b data-i18n="contact">تابعنا على إنستغرام</b><small>@nexa.ryx</small></span></a>
+      <button class="cbtn" id="replay" type="button" data-i18n="replay">شاهد الشرح مرة ثانية</button>
+      <button class="ghost" id="helpBack" type="button" data-i18n="back" style="margin-top:16px">رجوع</button>
+    </section>
+  </main>
+
+  <div class="cta" id="ctaForm">
+    <button class="go" id="next" type="button" data-i18n="cont">تابع</button>
+    <p class="hint" data-i18n="hint">التطبيق ما بيخزّن أي رمز سري. الرمز بتكتبه بشاشة الشركة.</p>
+  </div>
+  <div class="back" id="ctaBack" style="display:none;padding-inline:16px">
+    <button class="ghost" id="back" type="button" data-i18n="back">رجوع</button>
+  </div>
+  <footer class="credit"><span data-i18n="credit">تم التطوير من</span> <a id="nexaLink" href="#" target="_blank" rel="noopener">NEXA</a> <span data-i18n="creditSfx">للخدمات الرقمية</span></footer>
+</div>
+
+<div class="onb" id="onb" hidden role="dialog" aria-modal="true">
+  <div class="onb-card">
+    <div class="onb-bar">
+      <button class="link" id="onbSkip" type="button" data-i18n="skip">تخطي</button>
+      <button class="lang" id="onbLang" type="button">EN</button>
+    </div>
+    <div class="onb-ico" id="onbIco"></div>
+    <h2 id="onbTitle"></h2>
+    <p id="onbText"></p>
+    <div class="dots" id="onbDots"></div>
+    <button class="go" id="onbNext" type="button"></button>
+  </div>
+</div>
+
+<div class="dlg" id="confirmDel" hidden role="dialog" aria-modal="true">
+  <div class="dlg-card">
+    <h2 data-i18n="delTitle">مسح كل التحويلات؟</h2>
+    <p id="delText"></p>
+    <button class="go danger" id="delYes" type="button" data-i18n="delYes">نعم، امسح</button>
+    <button class="ghost" id="delNo" type="button" data-i18n="delNo" style="margin-top:10px">لا، رجوع</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// ===== الكودات: عدّل هون لو تغيّر أي كود =====
+var METHODS = {
+  jawwal: { name: 'جوال باي', build: function (sim, p, a) { return '*' + (sim === 'ooredoo' ? '268' : '110') + '*1*' + p + '*' + a + '#'; } },
+  palpay: { name: 'بال باي',  build: function (sim, p, a) { return '*370*1*1*' + p + '*' + a + '#'; } }
+};
+// =============================================
+var method = null, sim = 'jawwal', to = 'driver', last = null, lang = 'ar';
+var BIG = 100;            // فوق هالمبلغ بتطلع رسالة تنبيه
+var IG_URL = 'https://www.instagram.com/nexa.ryx/';   // صفحة NEXA على إنستغرام
+var LABELS = { driver: 'رقم جوال السائق', merchant: 'رقم جوال التاجر', friend: 'رقم جوال الصديق' };
+var $ = function (id) { return document.getElementById(id); };
+
+function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+function paint() {
+  document.querySelectorAll('#methods .m').forEach(function (b) {
+    b.setAttribute('aria-pressed', b.dataset.id === method ? 'true' : 'false');
+  });
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.setAttribute('aria-pressed', b.dataset.sim === sim ? 'true' : 'false');
+  });
+  document.querySelectorAll('#pick button').forEach(function (b) {
+    b.setAttribute('aria-pressed', b.dataset.to === to ? 'true' : 'false');
+  });
+  $('phoneLbl').textContent = tr('lbl_' + to);
+  var onlyDial = (method === 'jawwal' && to === 'merchant');
+  $('fields').style.display = onlyDial ? 'none' : 'block';
+  $('mNote').style.display = onlyDial ? 'block' : 'none';
+  $('simBox').style.display = method === 'jawwal' ? 'block' : 'none';
+}
+function clr() { ['e-method', 'e-phone', 'e-amount'].forEach(function (i) { $(i).textContent = ''; }); }
+
+document.querySelectorAll('#methods .m').forEach(function (b) {
+  b.addEventListener('click', function () { if (METHODS[b.dataset.id]) { method = b.dataset.id; clr(); paint(); } });
+});
+document.querySelectorAll('.seg button').forEach(function (b) {
+  b.addEventListener('click', function () { sim = b.dataset.sim; paint(); });
+});
+document.querySelectorAll('#pick button').forEach(function (b) {
+  b.addEventListener('click', function () { to = b.dataset.to; paint(); });
+});
+$('phone').addEventListener('input', function () {
+  var d = this.value.replace(/\D/g, '').slice(0, 10);
+  this.value = d.slice(0, 3) + (d.length > 3 ? ' ' + d.slice(3, 6) : '') + (d.length > 6 ? ' ' + d.slice(6) : '');
+  clr();
+});
+$('amount').addEventListener('focus', function () { $('zero').style.display = 'none'; });
+$('amount').addEventListener('blur', function () { $('zero').style.display = this.value ? 'none' : 'grid'; });
+$('amount').addEventListener('input', function () { this.value = this.value.replace(/[^0-9.,]/g, ''); $('zero').style.display = this.value ? 'none' : 'grid'; clr(); });
+
+function showConfirm() {
+  store('method', method); store('sim', sim); store('to', to);
+  show('confirm');
+}
+function show(name) {
+  var map = { form: 'form', confirm: 'confirm', help: 'help', hist: 'histPanel' };
+  Object.keys(map).forEach(function (k) { $(map[k]).classList.toggle('on', k === name); });
+  $('ctaForm').style.display = name === 'form' ? 'block' : 'none';
+  $('ctaBack').style.display = name === 'confirm' ? 'block' : 'none';
+  $('tabs').hidden = !(name === 'form' || name === 'hist');
+  $('tabForm').setAttribute('aria-pressed', name === 'form' ? 'true' : 'false');
+  $('tabHist').setAttribute('aria-pressed', name === 'hist' ? 'true' : 'false');
+  if (name === 'hist') { purgeHist(); renderHist(); }
+  window.scrollTo(0, 0);
+}
+
+$('next').addEventListener('click', function () {
+  clr();
+  var ok = true;
+  if (method === 'jawwal' && to === 'merchant') { showMerchant(); return; }
+  var p = $('phone').value.replace(/\D/g, '');
+  var a = parseFloat($('amount').value.replace(',', '.'));
+  if (!method) { $('e-method').textContent = tr('errMethod'); ok = false; }
+  if (!/^(059|056)\d{7}$/.test(p)) { $('e-phone').textContent = tr('errPhone'); ok = false; }
+  if (!(a > 0)) { $('e-amount').textContent = tr('errAmount'); ok = false; }
+  if (!ok) return;
+  var amt = String(Math.round(a * 100) / 100);
+  var code = METHODS[method].build(sim, p, amt);
+  last = { amt: amt, p: p }; renderConfirm();
+  $('code').textContent = code;
+  $('dial').setAttribute('href', 'tel:' + code.replace(/#/g, '%23'));
+  showConfirm();
+});
+
+$('copy').addEventListener('click', function () {
+  var t = $('code').textContent, btn = this;
+  function done(ok) { btn.textContent = tr(ok ? 'copied' : 'copyManual'); }
+  function fallback() {
+    var r = document.createRange(); r.selectNodeContents($('code'));
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    done(ok);
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function () { done(true); }, fallback);
+      return;
+    }
+  } catch (e) {}
+  fallback();
+});
+
+function showMerchant() {
+  var code = '*' + (sim === 'ooredoo' ? '268' : '110') + '*2#';
+  last = { merchant: true }; renderConfirm();
+  $('code').textContent = code;
+  $('dial').setAttribute('href', 'tel:' + code.replace(/#/g, '%23'));
+  showConfirm();
+}
+
+$('back').addEventListener('click', function () {
+  $('copy').textContent = tr('copyBtn');
+  show('form');
+});
+
+var I18N = {
+  ar: {
+    brand: 'حوّل', themeAria: 'تبديل العرض نهاري أو ليلي', offline: 'بدون إنترنت',
+    payTo: 'بدك تدفع إلى', driver: 'سائق', merchant: 'تاجر', friend: 'صديق',
+    payMethod: 'وسيلة الدفع', m_jawwal: 'جوال باي', m_palpay: 'بال باي', m_bop: 'بنك فلسطين', soon: 'قريباً',
+    simLbl: 'الشريحة المفعّل عليها محفظة جوال باي', simHelp: 'اختار نوع الشريحة اللي مفعّلة عليها المحفظة. لو جوالك فيه شريحتين، اتصل من نفس الشريحة.', simJ: 'شريحة جوال', simO: 'شريحة أوريدو', jawwal: 'جوال', ooredoo: 'أوريدو',
+    lbl_driver: 'رقم جوال السائق', lbl_merchant: 'رقم جوال التاجر', lbl_friend: 'رقم جوال الصديق',
+    amountLbl: 'المبلغ', amountShekel: 'المبلغ بالشيكل',
+    merchantNote: 'الدفع لتاجر بجوال باي بيطلب الرمز السري قبل رقم التاجر، فما بنقدر نكتب الرقم والمبلغ مسبقاً. بعد ما يفتح الاتصال: اكتب رمزك السري، وبعدين رقم التاجر والمبلغ.',
+    sending: 'بدك تحوّل', via: 'عن طريق', toNumber: 'إلى الرقم',
+    confirmWarn: 'تأكد من الرقم والمبلغ، التحويل ما بيرجع.', confirmCall: 'تأكيد واتصال',
+    cont: 'تابع', hint: 'التطبيق ما بيخزّن أي رمز سري. الرمز بتكتبه بشاشة الشركة.', back: 'رجوع',
+    errMethod: 'اختار وسيلة الدفع أول', errPhone: 'الرقم لازم يكون 10 خانات ويبدأ بـ059 أو 056', errAmount: 'اكتب المبلغ',
+    help: 'مساعدة', histTitle: 'آخر التحويلات', clear: 'مسح', again: 'مرة ثانية',
+    bigWarn: 'المبلغ كبير. تأكد إنك ما أضفت صفر زيادة.', skip: 'تخطي', next: 'التالي', start: 'ابدأ',
+    s1t: 'اختار وسيلة الدفع', s1d: 'جوال باي أو بال باي، واكتب رقم المستلم والمبلغ.',
+    s2t: 'بنجهّز الاتصال إلك', s2d: 'بنركّب الكود وبنفتح شاشة الاتصال، بدون إنترنت. إنت بس بتضغط اتصال.',
+    s3t: 'رمزك السري بيضل معك', s3d: 'الرمز بتكتبه بشاشة الشركة نفسها. التطبيق ما بيشوفه ولا بيخزّنه.',
+    helpHow: 'كيف يشتغل؟', helpFaq: 'أسئلة شائعة',
+    h1: 'اختار وسيلة الدفع واكتب رقم المستلم والمبلغ.',
+    h2: 'اضغط "تابع" وراجع التفاصيل، وبعدين "تأكيد واتصال".',
+    h3: 'بتفتح شاشة الاتصال والكود جاهز. اضغط اتصال، وبعدين اكتب رمزك السري بشاشة الشركة.',
+    q1: 'هل التطبيق بيخزّن رمزي السري؟', a1: 'لا. الرمز بتكتبه بشاشة جوال باي أو بال باي نفسها، والتطبيق ما بيشوفه ولا بيخزّنه.',
+    q2: 'شو لازم يكون عندي قبل ما أستخدمه؟', a2: 'خدمة جوال باي أو بال باي مفعّلة عندك ومعك رصيد. التطبيق ما بيفعّل الخدمة.',
+    q3: 'ما فتحت شاشة الاتصال، شو أعمل؟', a3: 'افتح التطبيق من المتصفح مباشرة (Chrome) مش من داخل تطبيق ثاني، وتأكد إنك ضغطت "تأكيد واتصال".',
+    q4: 'بقدر أرجّع التحويل؟', a4: 'لا، التحويل ما بيرجع. راجع الرقم والمبلغ قبل التأكيد.',
+    q5: 'وين بتنحفظ التحويلات الأخيرة؟', a5: 'على جوالك بس، وبتقدر تمسحها بأي وقت من زر "مسح".',
+    contact: 'تابعنا على إنستغرام', replay: 'شاهد الشرح مرة ثانية',
+    fAll: 'الكل', fToday: 'اليوم', fRange: 'فترة محددة', fFrom: 'من', fTo: 'إلى', pf: 'من', pt: 'إلى', pu: 'حتى', sumAll: 'كل التحويلات', sumToday: 'تحويلات اليوم', sumSkip: 'مش محسوب: {n} دفع لتاجر بجوال باي (المبلغ بتكتبه بشاشة الشركة).', histNone: 'ما في تحويلات بهالفترة.', sumTotal: 'المجموع', oneT: 'تحويل', manyT: 'تحويلات',
+    tabSend: 'تحويل', tabHist: 'تحويلاتي', histNote: 'هون بتظهر التحويلات اللي فتحت اتصالها. بتنحفظ 30 يوم وبعدها بتنمسح تلقائياً. تأكد من رسالة الشركة إنه التحويل تم.', purged: 'تم مسح {n} تحويل أقدم من 30 يوم تلقائياً.', ok: 'تمام', histEmpty: 'ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هون.',
+    copyBtn: 'نسخ', copied: 'تم النسخ', copyManual: 'انسخه يدوي', iosNote: 'على الآيفون: انسخ الكود، وافتح تطبيق الهاتف، والصقه واتصل.',
+    delTitle: 'مسح كل التحويلات؟', delText: 'رح تنمسح {n} تحويل مسجّل على هالجوال، وما بتقدر ترجعهم.', delYes: 'نعم، امسح', delNo: 'لا، رجوع', delDone: 'تم مسح التحويلات',
+    credit: 'تم التطوير من', creditSfx: 'للخدمات الرقمية', shekel: 'شيكل', payMerchant: 'دفع لتاجر', afterPin: 'بعد الرمز السري'
+  },
+  en: {
+    brand: 'Hawwil', themeAria: 'Switch day or night mode', offline: 'Works offline',
+    payTo: 'Pay to', driver: 'Driver', merchant: 'Merchant', friend: 'Friend',
+    payMethod: 'Payment method', m_jawwal: 'Jawwal Pay', m_palpay: 'PalPay', m_bop: 'Bank of Palestine', soon: 'Soon',
+    simLbl: 'SIM your Jawwal Pay wallet is on', simHelp: 'Choose the SIM type your wallet is activated on. If your phone has two SIMs, make the call from that same SIM.', simJ: 'Jawwal SIM', simO: 'Ooredoo SIM', jawwal: 'Jawwal', ooredoo: 'Ooredoo',
+    lbl_driver: 'Driver’s phone number', lbl_merchant: 'Merchant’s phone number', lbl_friend: 'Friend’s phone number',
+    amountLbl: 'Amount', amountShekel: 'Amount in shekels',
+    merchantNote: 'Paying a merchant with Jawwal Pay asks for your PIN before the merchant number, so we can’t fill in the number and amount for you. After the call opens: enter your PIN, then the merchant number and amount.',
+    sending: 'You are sending', via: 'Via', toNumber: 'To number',
+    confirmWarn: 'Check the number and amount. Transfers can’t be reversed.', confirmCall: 'Confirm and call',
+    cont: 'Continue', hint: 'The app never stores any PIN. You enter it on the provider’s screen.', back: 'Back',
+    errMethod: 'Choose a payment method first', errPhone: 'The number must be 10 digits and start with 059 or 056', errAmount: 'Enter the amount',
+    help: 'Help', histTitle: 'Recent transfers', clear: 'Clear', again: 'Again',
+    bigWarn: 'This is a large amount. Make sure you didn’t add an extra zero.', skip: 'Skip', next: 'Next', start: 'Get started',
+    s1t: 'Choose how to pay', s1d: 'Jawwal Pay or PalPay, then enter the recipient’s number and the amount.',
+    s2t: 'We get the call ready', s2d: 'We build the code and open the dialer, no internet needed. You just press call.',
+    s3t: 'Your PIN stays with you', s3d: 'You type it on the provider’s own screen. The app never sees or stores it.',
+    helpHow: 'How it works', helpFaq: 'Common questions',
+    h1: 'Choose a payment method and enter the recipient’s number and the amount.',
+    h2: 'Tap “Continue”, check the details, then “Confirm and call”.',
+    h3: 'The dialer opens with the code ready. Press call, then type your PIN on the provider’s screen.',
+    q1: 'Does the app store my PIN?', a1: 'No. You type it on the Jawwal Pay or PalPay screen itself. The app never sees or stores it.',
+    q2: 'What do I need before using it?', a2: 'Jawwal Pay or PalPay already activated on your phone, with some balance. The app does not activate the service.',
+    q3: 'The dialer did not open. What now?', a3: 'Open the app directly in your browser (Chrome), not inside another app, and make sure you tapped “Confirm and call”.',
+    q4: 'Can I reverse a transfer?', a4: 'No. Check the number and amount before you confirm.',
+    q5: 'Where are recent transfers saved?', a5: 'Only on your phone. You can clear them anytime with the “Clear” button.',
+    contact: 'Follow us on Instagram', replay: 'Watch the intro again',
+    fAll: 'All', fToday: 'Today', fRange: 'Custom range', fFrom: 'From', fTo: 'To', pf: 'From', pt: 'to', pu: 'Until', sumAll: 'All transfers', sumToday: 'Today’s transfers', sumSkip: 'Not counted: {n} Jawwal Pay merchant payment(s) (you enter the amount on the provider’s screen).', histNone: 'No transfers in this period.', sumTotal: 'Total', oneT: 'transfer', manyT: 'transfers',
+    tabSend: 'Send', tabHist: 'My transfers', histNote: 'Transfers whose call you opened show up here. They are kept for 30 days, then deleted automatically. Check the provider’s message to confirm it went through.', purged: '{n} transfer(s) older than 30 days were deleted automatically.', ok: 'OK', histEmpty: 'No transfers yet. Your first transfer will show up here.',
+    copyBtn: 'Copy', copied: 'Copied', copyManual: 'Copy it manually', iosNote: 'On iPhone: copy the code, open the Phone app, paste it and call.',
+    delTitle: 'Delete all transfers?', delText: '{n} transfer(s) saved on this phone will be deleted. This can’t be undone.', delYes: 'Yes, delete', delNo: 'No, go back', delDone: 'Transfers deleted',
+    credit: 'Developed by', creditSfx: 'Digital Services', shekel: '₪', payMerchant: 'Pay a merchant', afterPin: 'After your PIN'
+  }
+};
+function tr(k) { return (I18N[lang] && I18N[lang][k]) || I18N.ar[k] || k; }
+function renderConfirm() {
+  if (!last) return;
+  $('bigWarn').hidden = !(!last.merchant && parseFloat(last.amt) >= BIG);
+  var simTxt = method === 'jawwal' ? ' (' + tr(sim === 'ooredoo' ? 'ooredoo' : 'jawwal') + ')' : '';
+  if (last.merchant) {
+    $('c-amount').textContent = tr('payMerchant');
+    $('c-method').textContent = tr('m_jawwal') + simTxt;
+    $('c-phone').textContent = tr('afterPin');
+  } else {
+    $('c-amount').textContent = last.amt + ' ' + tr('shekel');
+    $('c-method').textContent = tr('m_' + method) + simTxt;
+    $('c-phone').textContent = last.p;
+  }
+}
+function applyLang(l) {
+  lang = l;
+  var root = document.documentElement;
+  root.setAttribute('lang', l);
+  root.setAttribute('dir', l === 'ar' ? 'rtl' : 'ltr');
+  document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = tr(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', tr(el.getAttribute('data-i18n-aria'))); });
+  $('lang').textContent = $('onbLang').textContent = l === 'ar' ? 'EN' : 'عربي';
+  document.title = tr('brand');
+  clr(); paint(); renderConfirm(); renderHist(); renderOnb();
+}
+$('lang').addEventListener('click', function () {
+  var l = lang === 'ar' ? 'en' : 'ar';
+  applyLang(l); store('lang', l);
+});
+
+
+// ----- تحويلاتي (بتنحفظ على الجوال بس) -----
+function fmt(d) { d = String(d); return d.slice(0, 3) + ' ' + d.slice(3, 6) + ' ' + d.slice(6); }
+function getHist() { try { var a = JSON.parse(load('hist') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+function pushHist(item) {
+  var list = getHist(); list.unshift(item);
+  store('hist', JSON.stringify(list.slice(0, 30)));
+}
+var KEEP_DAYS = 30;   // مدة حفظ التحويلات قبل ما تنمسح تلقائياً
+function purgeHist() {
+  var list = getHist(), now = Date.now(), limit = KEEP_DAYS * 86400000, kept = [], removed = 0, changed = false;
+  list.forEach(function (x) {
+    if (!x.t) { x.t = now; changed = true; }
+    if (now - x.t > limit) { removed++; changed = true; } else kept.push(x);
+  });
+  if (changed) store('hist', JSON.stringify(kept));
+  if (removed) store('purged', String((parseInt(load('purged') || '0', 10) || 0) + removed));
+}
+function when(ts) {
+  if (!ts) return '';
+  try {
+    var d = new Date(ts), loc = (lang === 'ar' ? 'ar-PS' : 'en-GB') + '-u-nu-latn';
+    return d.toLocaleDateString(loc, { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString(loc, { hour: 'numeric', minute: '2-digit' });
+  } catch (e) { return ''; }
+}
+var hf = { mode: 'all', from: '', to: '' };
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+function dayKey(ts) { var d = new Date(ts); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function dateLabel(key) {
+  try {
+    var a = key.split('-'), d = new Date(+a[0], +a[1] - 1, +a[2]), o = { day: 'numeric', month: 'short' };
+    if (+a[0] !== new Date().getFullYear()) o.year = 'numeric';
+    return d.toLocaleDateString((lang === 'ar' ? 'ar-PS' : 'en-GB') + '-u-nu-latn', o);
+  } catch (e) { return key; }
+}
+function periodLabel() {
+  if (hf.mode === 'today') return tr('sumToday');
+  if (hf.mode === 'range') {
+    if (hf.from && hf.to) return hf.from === hf.to ? dateLabel(hf.from) : tr('pf') + ' ' + dateLabel(hf.from) + ' ' + tr('pt') + ' ' + dateLabel(hf.to);
+    if (hf.from) return tr('pf') + ' ' + dateLabel(hf.from);
+    if (hf.to) return tr('pu') + ' ' + dateLabel(hf.to);
+  }
+  return tr('sumAll');
+}
+function paintFilters() {
+  document.querySelectorAll('#filters [data-f]').forEach(function (b) {
+    b.setAttribute('aria-pressed', b.dataset.f === hf.mode ? 'true' : 'false');
+  });
+  $('rangeRow').hidden = hf.mode !== 'range';
+}
+function inFilter(h, today) {
+  if (hf.mode === 'all') return true;
+  if (!h.t) return false;
+  var k = dayKey(h.t);
+  if (hf.mode === 'today') return k === today;
+  if (hf.from && k < hf.from) return false;
+  if (hf.to && k > hf.to) return false;
+  return true;
+}
+function renderHist() {
+  var all = getHist().filter(function (h) { return METHODS[h.m]; }), box = $('histList');
+  var today = dayKey(Date.now());
+  var list = all.filter(function (h) { return inFilter(h, today); });
+  paintFilters();
+  box.innerHTML = '';
+  $('histEmpty').textContent = tr(all.length ? 'histNone' : 'histEmpty');
+  $('histEmpty').hidden = list.length > 0;
+  $('filters').hidden = !all.length;
+  $('histClear').hidden = !all.length;
+  var pn = parseInt(load('purged') || '0', 10) || 0;
+  $('purgeBanner').hidden = !pn;
+  $('purgeText').textContent = tr('purged').replace('{n}', pn);
+  if (list.length) {
+    var sum = 0, skipped = 0;
+    list.forEach(function (h) { if (h.merchant) skipped++; else sum += parseFloat(h.a) || 0; });
+    $('sumPeriod').textContent = periodLabel();
+    $('sumCount').textContent = list.length + ' ' + tr(list.length === 1 ? 'oneT' : 'manyT');
+    $('sumVal').textContent = Math.round(sum * 100) / 100;
+    $('sumCard').hidden = false;
+    $('sumSkip').hidden = !skipped;
+    $('sumSkip').textContent = tr('sumSkip').replace('{n}', skipped);
+  } else { $('sumCard').hidden = true; $('sumSkip').hidden = true; }
+  list.forEach(function (h) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'hitem';
+    var wrap = document.createElement('div');
+    var l1 = document.createElement('b'); l1.textContent = h.merchant ? tr('payMerchant') : fmt(h.p);
+    var l2 = document.createElement('span');
+    var role = (h.to && I18N.ar[h.to] && !h.merchant) ? tr(h.to) + ' · ' : '';
+    l2.textContent = role + tr('m_' + h.m) + (h.m === 'jawwal' ? ' (' + tr(h.s === 'ooredoo' ? 'ooredoo' : 'jawwal') + ')' : '') + (h.merchant ? '' : ' · ' + h.a + ' ' + tr('shekel'));
+    if (h.merchant) l1.style.direction = 'inherit';
+    wrap.appendChild(l1); wrap.appendChild(l2);
+    var w = when(h.t);
+    if (w) { var l3 = document.createElement('span'); l3.textContent = w; wrap.appendChild(l3); }
+    var ic = document.createElement('i'); ic.className = 'again'; ic.textContent = tr('again');
+    b.appendChild(wrap); b.appendChild(ic);
+    b.addEventListener('click', function () { useHist(h); });
+    box.appendChild(b);
+  });
+}
+document.querySelectorAll('#filters [data-f]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    hf = { mode: b.dataset.f, from: '', to: '' };
+    $('dFrom').value = ''; $('dTo').value = ''; $('dTo').removeAttribute('min');
+    renderHist();
+  });
+});
+$('dFrom').setAttribute('max', dayKey(Date.now())); $('dTo').setAttribute('max', dayKey(Date.now()));
+$('dFrom').addEventListener('change', function () {
+  hf.from = this.value;
+  if (this.value) $('dTo').setAttribute('min', this.value); else $('dTo').removeAttribute('min');
+  if (hf.to && hf.from && hf.to < hf.from) { hf.to = ''; $('dTo').value = ''; }
+  renderHist();
+});
+$('dTo').addEventListener('change', function () { hf.to = this.value; renderHist(); });
+function useHist(h) {
+  if (!METHODS[h.m]) return;
+  method = h.m; sim = h.s === 'ooredoo' ? 'ooredoo' : 'jawwal'; to = LABELS[h.to] ? h.to : 'driver';
+  if (!h.merchant) { $('phone').value = fmt(h.p); $('amount').value = String(h.a); $('zero').style.display = 'none'; }
+  paint(); show('form'); $('next').click();
+}
+$('dial').addEventListener('click', function () {
+  if (!last) return;
+  if (last.merchant) pushHist({ m: method, s: sim, to: 'merchant', merchant: true, t: Date.now() });
+  else pushHist({ m: method, s: sim, to: to, p: last.p, a: last.amt, t: Date.now() });
+});
+document.querySelectorAll('#tabs button').forEach(function (b) {
+  b.addEventListener('click', function () { show(b.id === 'tabHist' ? 'hist' : 'form'); });
+});
+
+// ----- شاشة التعريف + المساعدة -----
+var ICO = [
+  '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M3 10h18M7 15h3"/></svg>',
+  '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>',
+  '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg>'
+];
+var onbI = 0;
+function renderOnb() {
+  var n = onbI + 1;
+  $('onbIco').innerHTML = ICO[onbI];
+  $('onbTitle').textContent = tr('s' + n + 't');
+  $('onbText').textContent = tr('s' + n + 'd');
+  $('onbNext').textContent = tr(onbI === 2 ? 'start' : 'next');
+  var d = ''; for (var i = 0; i < 3; i++) d += '<span class="dot' + (i === onbI ? ' on' : '') + '"></span>';
+  $('onbDots').innerHTML = d;
+}
+function openOnb() { onbI = 0; renderOnb(); $('onb').hidden = false; }
+function closeOnb() { $('onb').hidden = true; store('seen', '1'); }
+$('onbNext').addEventListener('click', function () { if (onbI < 2) { onbI++; renderOnb(); } else closeOnb(); });
+$('onbSkip').addEventListener('click', closeOnb);
+$('histClear').addEventListener('click', function () {
+  $('delText').textContent = tr('delText').replace('{n}', getHist().length);
+  $('confirmDel').hidden = false;
+});
+$('delNo').addEventListener('click', function () { $('confirmDel').hidden = true; });
+$('confirmDel').addEventListener('click', function (e) { if (e.target === this) this.hidden = true; });
+$('delYes').addEventListener('click', function () {
+  store('hist', '[]'); store('purged', '0');
+  $('confirmDel').hidden = true;
+  hf = { mode: 'all', from: '', to: '' };
+  renderHist();
+  $('toast').textContent = tr('delDone'); $('toast').hidden = false;
+  setTimeout(function () { $('toast').hidden = true; }, 3000);
+});
+$('purgeOk').addEventListener('click', function () { store('purged', '0'); renderHist(); });
+$('onbLang').addEventListener('click', function () { $('lang').click(); });
+$('helpBtn').addEventListener('click', function () { show('help'); });
+$('helpBack').addEventListener('click', function () { show('form'); });
+$('replay').addEventListener('click', openOnb);
+$('contact').href = IG_URL; $('nexaLink').href = IG_URL;
+
+var SUN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+var MOON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  $('theme').innerHTML = t === 'dark' ? SUN : MOON;
+  var m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', t === 'dark' ? '#0a121d' : '#f3f5f7');
+}
+$('theme').addEventListener('click', function () {
+  var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(t); store('theme', t);
+});
+(function initTheme() {
+  var t = load('theme');
+  if (t !== 'dark' && t !== 'light') {
+    t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  applyTheme(t);
+})();
+
+(function init() {
+  var m = load('method'), s = load('sim');
+  if (m && METHODS[m]) method = m;
+  if (s === 'jawwal' || s === 'ooredoo') sim = s;
+  var t = load('to'); if (LABELS[t]) to = t;
+  var lg = load('lang');
+  var IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (IS_IOS) { $('codebox').hidden = false; $('iosNote').hidden = false; }
+  purgeHist();
+  applyLang(lg === 'en' ? 'en' : 'ar');
+  var pn0 = parseInt(load('purged') || '0', 10) || 0;
+  if (pn0 && load('seen')) {
+    $('toast').textContent = tr('purged').replace('{n}', pn0); $('toast').hidden = false;
+    setTimeout(function () { $('toast').hidden = true; }, 6000);
+  }
+  if (!load('seen')) openOnb();
+})();
+</script>
+</body>
+</html>
