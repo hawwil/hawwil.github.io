@@ -38,7 +38,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system
 .app{max-width:440px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 .top{display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px}
 .brand{display:flex;align-items:center;gap:10px;font-family:"Cairo","Tajawal",sans-serif;font-weight:800;font-size:20px}
-.mark{width:34px;height:34px;border-radius:10px;background:var(--yellow);color:var(--on-yellow);display:grid;place-items:center;font-size:18px;font-weight:800}
+.mark{width:36px;height:36px;border-radius:10px;background:#fff;overflow:hidden;display:grid;place-items:center;font-size:18px;font-weight:800}
 .tools{display:flex;align-items:center;gap:8px}
 .theme{width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
 .lang{height:36px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:"Cairo",sans-serif;font-weight:700;font-size:13px;cursor:pointer}
@@ -196,7 +196,7 @@ input:focus,input:focus-visible{outline:none}
 <body>
 <div class="app">
   <header class="top">
-    <div class="brand"><span class="mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-4-4"/><path d="M20 16H6l4 4"/></svg></span><span data-i18n="brand">حوّل</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 512 512" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M146 126V386M366 126V386" stroke="#0A0A0A" stroke-width="58"/><path d="M208 256H296M262 216L302 256L262 296" stroke="#FFC107" stroke-width="38"/></svg></span><span data-i18n="brand">حوّل</span></div>
     <div class="tools"><button class="lang" id="lang" type="button">EN</button><button class="theme" id="theme" type="button" data-i18n-aria="themeAria" aria-label="تبديل العرض نهاري أو ليلي"></button><button class="theme" id="helpBtn" type="button" data-i18n-aria="help" aria-label="مساعدة"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7"/><path d="M12 17h.01"/></svg></button></div>
   </header>
   <nav class="tabs" id="tabs"><button type="button" id="tabForm" aria-pressed="true" data-i18n="tabSend">تحويل</button><button type="button" id="tabHist" aria-pressed="false" data-i18n="tabHist">تحويلاتي</button></nav>
