@@ -13,7 +13,7 @@
 <link rel="icon" type="image/png" href="icon-v3-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <title>حوّل</title>
-<meta name="description" content="حوّل: مساعد تحويل أموال، بيجهّز كود جوال باي وبال باي ويفتح الاتصال بدون إنترنت.">
+<meta name="description" content="حوّل: مساعد تحويل أموال، بيجهّز كود جوال باي وبال باي وبنك فلسطين ويفتح الاتصال بدون إنترنت.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700&display=swap">
 <style>
 :root{
@@ -377,12 +377,12 @@ input:focus,input:focus-visible{outline:none}
       </div>
       <p class="sumskip" id="sumSkip" hidden></p>
       <div id="histList"></div>
-      <p class="empty" id="histEmpty" data-i18n="histEmpty" hidden>ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هنا.</p>
+      <p class="empty" id="histEmpty" data-i18n="histEmpty" hidden>لم يتم إجراء تحويلات. أول تحويل بتعمله رح يظهر هنا.</p>
     </section>
 
     <section id="help" class="panel">
       <h2 class="help-title" data-i18n="help">مساعدة</h2>
-      <p class="hdesc" data-i18n="helpAbout">حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.</p>
+      <p class="hdesc" data-i18n="helpAbout">حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي أو بنك فلسطين، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.</p>
       <p class="hsec" data-i18n="helpHow">كيف يشتغل؟</p>
       <ol class="steps">
         <li data-i18n="h1">اختار وسيلة الدفع واكتب رقم المستلم والمبلغ.</li>
@@ -409,7 +409,7 @@ input:focus,input:focus-visible{outline:none}
   <div class="back" id="ctaBack" style="display:none;padding-inline:16px">
     <button class="ghost" id="back" type="button" data-i18n="back">رجوع</button>
   </div>
-  <footer class="credit"><span class="disc" data-i18n="disc">حوّل أداة مساعدة وليست جهة مالية. التحويل بيتم عبر جوال باي أو بال باي.</span><span data-i18n="credit">تم التطوير من</span> <a id="nexaLink" href="#" target="_blank" rel="noopener">NEXA</a> <span data-i18n="creditSfx">للخدمات الرقمية</span><br><small>© 2026 NEXA · جميع الحقوق محفوظة</small> <span class="ver" id="swinfo" dir="ltr"></span></footer>
+  <footer class="credit"><span class="disc" data-i18n="disc">حوّل أداة مساعدة وليست جهة مالية. التحويل يتم من خلال جوال باي أو بال باي أو بنك فلسطين.</span><span data-i18n="credit">تم التطوير من</span> <a id="nexaLink" href="#" target="_blank" rel="noopener">NEXA</a> <span data-i18n="creditSfx">للخدمات الرقمية</span><br><small>© 2026 NEXA · جميع الحقوق محفوظة</small> <span class="ver" id="swinfo" dir="ltr"></span></footer>
 </div>
 
 <div class="onb" id="onb" hidden role="dialog" aria-modal="true">
@@ -695,24 +695,24 @@ var I18N = {
     errMethod: 'اختار وسيلة الدفع أول', errPhone: 'الرقم لازم يكون 10 خانات ويبدأ بـ059 أو 056', errAmount: 'اكتب المبلغ',
     help: 'مساعدة', histTitle: 'آخر التحويلات', clear: 'مسح', again: 'مرة ثانية',
     bigWarn: 'المبلغ كبير. تأكد إنك ما أضفت صفر زيادة.', skip: 'تخطي', next: 'التالي', start: 'ابدأ',
-    s1t: 'حوّل، مساعد تحويل أموال', s1d: 'اختار وسيلة الدفع (جوال باي أو بال باي) واكتب رقم المستلم والمبلغ، وبنجهّز الكود إلك.',
+    s1t: 'حوّل، مساعد تحويل أموال', s1d: 'اختار وسيلة الدفع (جوال باي أو بال باي أو بنك فلسطين) واكتب رقم المستلم والمبلغ، وبنجهّز الكود إلك.',
     s2t: 'بنجهّز الاتصال إلك', s2d: 'بنركّب الكود وبنفتح شاشة الاتصال، بدون إنترنت. إنت بس بتضغط اتصال.',
     s3t: 'رمزك السري بيضل معك', s3d: 'الرمز بتكتبه بشاشة الشركة نفسها. التطبيق ما بيشوفه ولا بيخزّنه.',
     helpHow: 'كيف يشتغل؟', helpFaq: 'أسئلة شائعة',
     h1: 'اختار وسيلة الدفع واكتب رقم المستلم والمبلغ.',
     h2: 'اضغط "تابع" وراجع التفاصيل، وبعدين "تأكيد واتصال".',
     h3: 'بتفتح شاشة الاتصال والكود جاهز. اضغط اتصال، وبعدين اكتب رمزك السري بشاشة الشركة.',
-    q1: 'هل التطبيق بيخزّن رمزي السري؟', a1: 'لا. الرمز بتكتبه بشاشة جوال باي أو بال باي نفسها، والتطبيق ما بيشوفه ولا بيخزّنه.',
-    q2: 'شو لازم يكون عندي قبل ما أستخدمه؟', a2: 'خدمة جوال باي أو بال باي مفعّلة عندك ومعك رصيد. التطبيق ما بيفعّل الخدمة.',
+    q1: 'هل التطبيق بيخزّن رمزي السري؟', a1: 'لا. الرمز بتكتبه بشاشة الشركة أو البنك نفسها، والتطبيق ما بيشوفه ولا بيخزّنه.',
+    q2: 'شو لازم يكون عندي قبل ما أستخدمه؟', a2: 'خدمة جوال باي أو بال باي أو بنك فلسطين مفعّلة عندك ومعك رصيد. التطبيق ما بيفعّل الخدمة.',
     q3: 'ما فتحت شاشة الاتصال، شو أعمل؟', a3: 'افتح التطبيق من المتصفح مباشرة (Chrome) مش من داخل تطبيق ثاني، وتأكد إنك ضغطت "تأكيد واتصال".',
     q4: 'بقدر أرجّع التحويل؟', a4: 'لا، التحويل ما بيرجع. راجع الرقم والمبلغ قبل التأكيد.',
     q5: 'وين بتنحفظ التحويلات الأخيرة؟', a5: 'على جوالك بس، وبتقدر تمسحها بأي وقت من زر "مسح".',
     contact: 'تابعنا على إنستغرام', replay: 'شاهد الشرح مرة ثانية',
     fAll: 'الكل', fToday: 'اليوم', fRange: 'فترة محددة', fFrom: 'من', fTo: 'إلى', pf: 'من', pt: 'إلى', pu: 'حتى', sumAll: 'كل التحويلات', sumToday: 'تحويلات اليوم', sumSkip: 'مش محسوب: {n} دفع لتاجر بجوال باي (المبلغ بتكتبه بشاشة الشركة).', histNone: 'ما في تحويلات بهالفترة.', sumTotal: 'المجموع', oneT: 'تحويل', manyT: 'تحويلات',
-    tabSend: 'تحويل', tabHist: 'تحويلاتي', histNote: 'هنا بتظهر التحويلات اللي فتحت اتصالها. بتنحفظ 30 يوم وبعدها بتنمسح تلقائياً. تأكد من رسالة الشركة إنه التحويل تم.', purged: 'تم مسح {n} تحويل أقدم من 30 يوم تلقائياً.', ok: 'تمام', histEmpty: 'ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هنا.',
+    tabSend: 'تحويل', tabHist: 'تحويلاتي', histNote: 'هنا بتظهر التحويلات اللي فتحت اتصالها. بتنحفظ 30 يوم وبعدها بتنمسح تلقائياً. تأكد من رسالة الشركة إنه التحويل تم.', purged: 'تم مسح {n} تحويل أقدم من 30 يوم تلقائياً.', ok: 'تمام', histEmpty: 'لم يتم إجراء تحويلات. أول تحويل بتعمله رح يظهر هنا.',
     copyBtn: 'نسخ', copied: 'تم النسخ', copyManual: 'انسخه يدوي', iosNote: 'على الآيفون: انسخ الكود، وافتح تطبيق الهاتف، والصقه واتصل.',
     delTitle: 'مسح كل التحويلات؟', delText: 'رح تنمسح {n} تحويل مسجّل على هالجوال، وما بتقدر ترجعهم.', delYes: 'نعم، امسح', delNo: 'لا، رجوع', delDone: 'تم مسح التحويلات',
-    tagline: 'مساعد تحويل أموال', recentLbl: 'آخر الأرقام', nx1: 'اضغط "تأكيد واتصال"', nx2: 'اكتب رمزك السري بشاشة الشركة. التطبيق ما بيشوفو.', nx3: 'كمّل الخطوات وأكّد التحويل',  bopSub: 'بيفتح قائمة البنك', bopStep: 'بعد الاتصال', bopNote: 'بنك فلسطين بيطلب الرمز السري أول شي. بعد ما يفتح الاتصال اكتب رمزك بشاشة البنك وكمّل الخطوات بنفسك. التطبيق ما بيشوف رمزك.', bopAfter: 'اكتب رمزك السري وكمّل بشاشة البنك',   favLbl: 'المفضلة', namePh: 'الاسم (اختياري)', favAria: 'إضافة للمفضلة', favMax: 'أقصى عدد للمفضلة 5. شيل واحد أول.', favNeed: 'اكتب الرقم أول', shareAria: 'مشاركة', shTitle: 'تحويل عبر حوّل', shTo: 'المستلم', shNum: 'الرقم', shAmt: 'المبلغ', shVia: 'الوسيلة',  clearAll: 'مسح كل السجل', delOne: 'مسح', delSure: 'متأكد؟',  reportBtn: 'بلّغ عن مشكلة', reportMsg: 'انسخت معلومات المشكلة. الصقها بالرسالة عنّا',  contactPick: 'اختيار من جهات الاتصال', errPickNo: 'ما لقينا رقم جوال صالح (059 أو 056) لهاي الجهة', updMsg: 'في تحديث جديد للتطبيق', updBtn: 'تحديث', helpAbout: 'حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.', disc: 'حوّل أداة مساعدة وليست جهة مالية. التحويل بيتم عبر جوال باي أو بال باي.',
+    tagline: 'مساعد تحويل أموال', recentLbl: 'آخر الأرقام', nx1: 'اضغط "تأكيد واتصال"', nx2: 'اكتب رمزك السري بشاشة الشركة. التطبيق ما بيشوفو.', nx3: 'كمّل الخطوات وأكّد التحويل',  bopSub: 'بيفتح قائمة البنك', bopStep: 'بعد الاتصال', bopNote: 'بنك فلسطين بيطلب الرمز السري أول شي. بعد ما يفتح الاتصال اكتب رمزك بشاشة البنك وكمّل الخطوات بنفسك. التطبيق ما بيشوف رمزك.', bopAfter: 'اكتب رمزك السري وكمّل بشاشة البنك',   favLbl: 'المفضلة', namePh: 'الاسم (اختياري)', favAria: 'إضافة للمفضلة', favMax: 'أقصى عدد للمفضلة 5. شيل واحد أول.', favNeed: 'اكتب الرقم أول', shareAria: 'مشاركة', shTitle: 'تحويل عبر حوّل', shTo: 'المستلم', shNum: 'الرقم', shAmt: 'المبلغ', shVia: 'الوسيلة',  clearAll: 'مسح كل السجل', delOne: 'مسح', delSure: 'متأكد؟',  reportBtn: 'بلّغ عن مشكلة', reportMsg: 'انسخت معلومات المشكلة. الصقها بالرسالة عنّا',  contactPick: 'اختيار من جهات الاتصال', errPickNo: 'ما لقينا رقم جوال صالح (059 أو 056) لهاي الجهة', updMsg: 'في تحديث جديد للتطبيق', updBtn: 'تحديث', helpAbout: 'حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي أو بنك فلسطين، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.', disc: 'حوّل أداة مساعدة وليست جهة مالية. التحويل يتم من خلال جوال باي أو بال باي أو بنك فلسطين.',
     credit: 'تم التطوير من', creditSfx: 'للخدمات الرقمية', shekel: 'شيكل', payMerchant: 'دفع لتاجر', afterPin: 'بعد الرمز السري'
   },
   en: {
@@ -730,15 +730,15 @@ var I18N = {
     errMethod: 'Choose a payment method first', errPhone: 'The number must be 10 digits and start with 059 or 056', errAmount: 'Enter the amount',
     help: 'Help', histTitle: 'Recent transfers', clear: 'Clear', again: 'Again',
     bigWarn: 'This is a large amount. Make sure you didn’t add an extra zero.', skip: 'Skip', next: 'Next', start: 'Get started',
-    s1t: 'Hawwil, a money transfer assistant', s1d: 'Choose how to pay (Jawwal Pay or PalPay), enter the recipient’s number and the amount, and we prepare the code for you.',
+    s1t: 'Hawwil, a money transfer assistant', s1d: 'Choose how to pay (Jawwal Pay, PalPay or Bank of Palestine), enter the recipient’s number and the amount, and we prepare the code for you.',
     s2t: 'We get the call ready', s2d: 'We build the code and open the dialer, no internet needed. You just press call.',
     s3t: 'Your PIN stays with you', s3d: 'You type it on the provider’s own screen. The app never sees or stores it.',
     helpHow: 'How it works', helpFaq: 'Common questions',
     h1: 'Choose a payment method and enter the recipient’s number and the amount.',
     h2: 'Tap “Continue”, check the details, then “Confirm and call”.',
     h3: 'The dialer opens with the code ready. Press call, then type your PIN on the provider’s screen.',
-    q1: 'Does the app store my PIN?', a1: 'No. You type it on the Jawwal Pay or PalPay screen itself. The app never sees or stores it.',
-    q2: 'What do I need before using it?', a2: 'Jawwal Pay or PalPay already activated on your phone, with some balance. The app does not activate the service.',
+    q1: 'Does the app store my PIN?', a1: 'No. You type it on the provider’s or bank’s screen itself. The app never sees or stores it.',
+    q2: 'What do I need before using it?', a2: 'Jawwal Pay, PalPay or Bank of Palestine already activated on your phone, with some balance. The app does not activate the service.',
     q3: 'The dialer did not open. What now?', a3: 'Open the app directly in your browser (Chrome), not inside another app, and make sure you tapped “Confirm and call”.',
     q4: 'Can I reverse a transfer?', a4: 'No. Check the number and amount before you confirm.',
     q5: 'Where are recent transfers saved?', a5: 'Only on your phone. You can clear them anytime with the “Clear” button.',
@@ -747,7 +747,7 @@ var I18N = {
     tabSend: 'Send', tabHist: 'My transfers', histNote: 'Transfers whose call you opened show up here. They are kept for 30 days, then deleted automatically. Check the provider’s message to confirm it went through.', purged: '{n} transfer(s) older than 30 days were deleted automatically.', ok: 'OK', histEmpty: 'No transfers yet. Your first transfer will show up here.',
     copyBtn: 'Copy', copied: 'Copied', copyManual: 'Copy it manually', iosNote: 'On iPhone: copy the code, open the Phone app, paste it and call.',
     delTitle: 'Delete all transfers?', delText: '{n} transfer(s) saved on this phone will be deleted. This can’t be undone.', delYes: 'Yes, delete', delNo: 'No, go back', delDone: 'Transfers deleted',
-    tagline: 'Money transfer assistant', recentLbl: 'Recent numbers', nx1: 'Tap “Confirm and call”', nx2: 'Enter your PIN on the provider’s screen. The app never sees it.', nx3: 'Follow the steps and confirm the transfer',  bopSub: 'Opens the bank menu', bopStep: 'After the call', bopNote: 'Bank of Palestine asks for your PIN first. After the call opens, enter your PIN on the bank screen and continue the steps yourself. The app never sees your PIN.', bopAfter: 'Enter your PIN and continue on the bank screen',   favLbl: 'Favorites', namePh: 'Name (optional)', favAria: 'Add to favorites', favMax: 'Max 5 favorites. Remove one first.', favNeed: 'Enter the number first', shareAria: 'Share', shTitle: 'Transfer via Hawwil', shTo: 'To', shNum: 'Number', shAmt: 'Amount', shVia: 'Method',  clearAll: 'Clear all history', delOne: 'Delete', delSure: 'Sure?',  reportBtn: 'Report a problem', reportMsg: 'Problem details copied. Paste them in the message to us',  contactPick: 'Pick from contacts', errPickNo: 'No valid mobile number (059 or 056) found for this contact', updMsg: 'A new version is available', updBtn: 'Update', helpAbout: 'Hawwil is a money transfer assistant: it prepares the transfer code and opens the dialer. The transfer itself is made through Jawwal Pay or PalPay. The app never moves money or stores any PIN.', disc: 'Hawwil is a helper tool, not a financial institution. Transfers are made through Jawwal Pay or PalPay.',
+    tagline: 'Money transfer assistant', recentLbl: 'Recent numbers', nx1: 'Tap “Confirm and call”', nx2: 'Enter your PIN on the provider’s screen. The app never sees it.', nx3: 'Follow the steps and confirm the transfer',  bopSub: 'Opens the bank menu', bopStep: 'After the call', bopNote: 'Bank of Palestine asks for your PIN first. After the call opens, enter your PIN on the bank screen and continue the steps yourself. The app never sees your PIN.', bopAfter: 'Enter your PIN and continue on the bank screen',   favLbl: 'Favorites', namePh: 'Name (optional)', favAria: 'Add to favorites', favMax: 'Max 5 favorites. Remove one first.', favNeed: 'Enter the number first', shareAria: 'Share', shTitle: 'Transfer via Hawwil', shTo: 'To', shNum: 'Number', shAmt: 'Amount', shVia: 'Method',  clearAll: 'Clear all history', delOne: 'Delete', delSure: 'Sure?',  reportBtn: 'Report a problem', reportMsg: 'Problem details copied. Paste them in the message to us',  contactPick: 'Pick from contacts', errPickNo: 'No valid mobile number (059 or 056) found for this contact', updMsg: 'A new version is available', updBtn: 'Update', helpAbout: 'Hawwil is a money transfer assistant: it prepares the transfer code and opens the dialer. The transfer itself is made through Jawwal Pay, PalPay or Bank of Palestine. The app never moves money or stores any PIN.', disc: 'Hawwil is a helper tool, not a financial institution. Transfers are made through Jawwal Pay, PalPay or Bank of Palestine.',
     credit: 'Developed by', creditSfx: 'Digital Services', shekel: '₪', payMerchant: 'Pay a merchant', afterPin: 'After your PIN'
   }
 };
