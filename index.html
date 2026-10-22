@@ -861,6 +861,12 @@ function purgeHist() {
   if (changed) store('hist', JSON.stringify(kept));
   if (removed) store('purged', String((parseInt(load('purged') || '0', 10) || 0) + removed));
 }
+function whenShare(ts) {
+  try {
+    var d = new Date(ts);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  } catch (e) { return ''; }
+}
 function when(ts) {
   if (!ts) return '';
   try {
@@ -964,7 +970,8 @@ function renderHist() {
         var R = lang === 'ar' ? '\u200F' : '';
         var lines = [tr('shTitle')];
         if (hn) lines.push(tr('shTo') + ': ' + hn);
-        lines.push(tr('shNum') + ': ' + fmt(h.p), tr('shAmt') + ': ' + h.a + ' ' + tr('shekel'), tr('shVia') + ': ' + tr('m_' + h.m), when(h.t));
+        var LRI = '\u2066', PDI = '\u2069';
+        lines.push(tr('shNum') + ': ' + LRI + h.p + PDI, tr('shAmt') + ': ' + h.a + ' ' + tr('shekel'), tr('shVia') + ': ' + tr('m_' + h.m), LRI + whenShare(h.t) + PDI);
         var txt = lines.map(function (l) { return R + l; }).join('\n');
         if (navigator.share) { navigator.share({ text: txt }).catch(function () {}); }
         else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener'); }
