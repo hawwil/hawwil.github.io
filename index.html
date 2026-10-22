@@ -59,7 +59,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system
 .nrow{display:flex;gap:8px;margin:8px 0 0}.nrow input{flex:1;min-width:0;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit;font-size:15px;min-height:44px}
 .favb{flex:none;width:46px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:12px;cursor:pointer;display:grid;place-items:center;padding:0}
 .favb[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:var(--on-yellow)}
-.rchip.fv{border-color:var(--yellow);direction:inherit}.rchip small{display:block;font-size:11px;font-weight:600;color:var(--muted);direction:ltr}
+.rchip.fv{direction:inherit;display:inline-flex;align-items:center;gap:9px;padding:5px 14px 5px 6px;min-height:46px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);font-weight:700;font-size:14px}
+.rchip.fv .av{flex:none;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--yellow) 28%,var(--surface));color:var(--ink);display:grid;place-items:center;font-family:"Cairo",sans-serif;font-weight:800;font-size:15px}
+.rchip.fv .tx{display:block;text-align:start;line-height:1.25}
+.rchip.fv small{margin-top:1px;font-size:11px;font-weight:500}.rchip small{display:block;font-size:11px;font-weight:600;color:var(--muted);direction:ltr}
 .hshare{flex:none;width:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;cursor:pointer;display:grid;place-items:center;padding:0}
 .rhead{display:flex;align-items:center;justify-content:space-between}.rhead .rlbl{margin-bottom:6px}.rhead .link{margin-bottom:4px}
 .favrow{display:flex;align-items:center;gap:8px;width:100%;background:var(--surface);border:1.5px solid var(--yellow);border-radius:14px;padding:6px 10px;margin-bottom:6px}
@@ -603,7 +606,13 @@ $('fav').addEventListener('click', function () {
 function chip(p, cls) {
   var b = document.createElement('button'); b.type = 'button'; b.className = 'rchip' + (cls ? ' ' + cls : '');
   var n = nameOf(p);
-  if (n) { b.appendChild(document.createTextNode(n)); var sm = document.createElement('small'); sm.textContent = fmt(p); b.appendChild(sm); }
+  if (cls === 'fv') {
+    var av = document.createElement('span'); av.className = 'av'; av.textContent = n ? Array.from(n)[0] : '\u2605'; b.appendChild(av);
+    var tx = document.createElement('span'); tx.className = 'tx';
+    tx.appendChild(document.createTextNode(n || fmt(p)));
+    if (n) { var sm2 = document.createElement('small'); sm2.textContent = fmt(p); tx.appendChild(sm2); }
+    b.appendChild(tx);
+  } else if (n) { b.appendChild(document.createTextNode(n)); var sm = document.createElement('small'); sm.textContent = fmt(p); b.appendChild(sm); }
   else b.textContent = fmt(p);
   b.addEventListener('click', function () { setPhone(p); $('pname').value = n; $('pname').dataset.for = n ? p : ''; clr(); syncName(); });
   return b;
