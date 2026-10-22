@@ -1,9 +1,9 @@
 // حوّل - تشغيل بدون إنترنت. غيّر رقم النسخة عند كل تحديث.
-var V = 'hawwil-v3';
+var V = 'hawwil-v4';
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-v3-192.png', 'icon-v3-512.png', 'apple-touch-icon-v3.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(V).then(function (c) {
-    return Promise.all(FILES.map(function (f) { return c.add(new Request(f, { cache: 'reload' })).catch(function () {}); });
+    return Promise.all(FILES.map(function (f) { return c.add(new Request(f, { cache: 'reload' })).catch(function () {}); }));
   }).then(function () { return self.skipWaiting(); }));
 });
 self.addEventListener('activate', function (e) {
