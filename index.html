@@ -1196,7 +1196,6 @@ function track(name) { var q = evq(); q.push(name); store('evq', JSON.stringify(
 (function init() {
   var s = load('sim');
   if (s === 'jawwal' || s === 'ooredoo') sim = s;
-  var t = load('to'); if (LABELS[t]) to = t;
   var lg = load('lang');
   var IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (IS_IOS) { $('codebox').hidden = false; $('iosNote').hidden = false; }
