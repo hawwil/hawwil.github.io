@@ -911,7 +911,14 @@ $('theme').addEventListener('click', function () {
     if (e.data && e.data.type === 'updated') $('upd').hidden = false;
   });
   $('updBtn').addEventListener('click', function () { location.reload(); });
-  navigator.serviceWorker.register('sw.js').catch(function () {});
+  var hadCtl = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadCtl) $('upd').hidden = false; hadCtl = true; });
+  navigator.serviceWorker.register('sw.js').then(function (reg) {
+    function watch(w) { if (w) w.addEventListener('statechange', function () { if (w.state === 'installed' && navigator.serviceWorker.controller) $('upd').hidden = false; }); }
+    if (reg.waiting && navigator.serviceWorker.controller) $('upd').hidden = false;
+    reg.addEventListener('updatefound', function () { watch(reg.installing); });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) reg.update().catch(function () {}); });
+  }).catch(function () {});
 })();
 
 (function init() {
