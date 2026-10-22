@@ -1194,8 +1194,7 @@ function track(name) { var q = evq(); q.push(name); store('evq', JSON.stringify(
 })();
 
 (function init() {
-  var m = load('method'), s = load('sim');
-  if (m && METHODS[m]) method = m;
+  var s = load('sim');
   if (s === 'jawwal' || s === 'ooredoo') sim = s;
   var t = load('to'); if (LABELS[t]) to = t;
   var lg = load('lang');
