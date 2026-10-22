@@ -541,7 +541,12 @@ function cleanPhone(raw) {
   if (d.length === 9 && d.charAt(0) === '5') d = '0' + d;
   return d.slice(0, 10);
 }
-function setPhone(d) { $('phone').value = d ? fmt(d).trim() : ''; }
+function setPhone(d) {
+  $('phone').value = d ? fmt(d).trim() : '';
+  var f = $('pname').dataset.for || '';
+  if (f !== d) { $('pname').value = ''; $('pname').dataset.for = ''; }
+  if (typeof syncName === 'function') syncName();
+}
 $('phone').addEventListener('input', function () {
   var d = cleanPhone(this.value);
   this.value = d.slice(0, 3) + (d.length > 3 ? ' ' + d.slice(3, 6) : '') + (d.length > 6 ? ' ' + d.slice(6) : '');
@@ -565,11 +570,16 @@ document.querySelectorAll('#qa button').forEach(function (b) {
 if ('contacts' in navigator && window.ContactsManager) {
   $('cpick').hidden = false;
   $('cpick').addEventListener('click', function () {
-    navigator.contacts.select(['tel'], { multiple: false }).then(function (res) {
+    navigator.contacts.select(['name', 'tel'], { multiple: false }).then(function (res) {
       if (!res || !res[0] || !res[0].tel) return;
       var found = '';
       res[0].tel.forEach(function (t) { var c = cleanPhone(t); if (!found && /^(059|056)\d{7}$/.test(c)) found = c; });
-      if (found) { setPhone(found); clr(); } else { $('e-phone').textContent = tr('errPickNo'); }
+      if (found) {
+        setPhone(found);
+        var cn = (res[0].name && res[0].name[0]) ? String(res[0].name[0]).trim().slice(0, 24) : '';
+        if (cn && !$('pname').value) { $('pname').value = cn; $('pname').dataset.for = found; }
+        syncName(); clr();
+      } else { $('e-phone').textContent = tr('errPickNo'); }
     }).catch(function () {});
   });
 }
