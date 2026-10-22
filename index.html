@@ -73,6 +73,18 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system
 .rwrap{display:inline-flex;align-items:stretch;background:var(--surface);border:1.5px solid var(--line);border-radius:999px;overflow:hidden}
 .rwrap .rchip{border:0;border-radius:0;background:transparent;padding:8px 6px 8px 14px}
 .rwrap .rx{flex:none;width:38px;border:0;border-inline-start:1px solid var(--line);background:transparent;color:var(--muted);font-size:16px;cursor:pointer;padding:0}
+.lblrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 10px}.lblrow .lbl{margin:0}
+.favbtn{flex:none;display:flex;flex-direction:column;align-items:center;gap:1px;background:transparent;border:0;border-radius:12px;padding:4px 10px;cursor:pointer;color:var(--muted);font:inherit;font-size:11px;font-weight:700;transition:background .15s,transform .12s}
+.favbtn[hidden]{display:none}.favbtn:active{transform:scale(.95)}
+.favbtn[aria-expanded="true"]{background:color-mix(in srgb,var(--yellow) 20%,var(--surface));color:var(--ink)}
+.favpanel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:6px;margin:0 0 12px;max-height:340px;overflow:auto;animation:pin .18s ease-out}
+.favpanel[hidden]{display:none}
+.favitem{display:flex;align-items:center;gap:12px;width:100%;background:transparent;border:0;border-radius:12px;padding:8px 8px;cursor:pointer;font:inherit;color:var(--ink);text-align:start}
+.favitem:active{background:var(--track)}.favitem+.favitem{border-top:1px solid var(--line);border-radius:0}
+.favitem .av{flex:none;width:38px;height:38px;border-radius:50%;background:color-mix(in srgb,var(--yellow) 22%,var(--surface));display:grid;place-items:center}
+.favitem .nm{flex:1;min-width:0;font-weight:800;font-size:15px}.favitem .nm small{display:block;font-size:12px;font-weight:600;color:var(--muted);direction:ltr;text-align:start}
+.favfoot{display:flex;justify-content:flex-end;padding:2px 6px 0}
+.favpanel .favrow{border-color:var(--line)}
 .hrow{display:flex;align-items:stretch;gap:8px;margin-bottom:8px}.hrow .hitem{margin-bottom:0;flex:1;min-width:0}
 .hdel{flex:none;min-width:48px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:14px;cursor:pointer;display:grid;place-items:center;font:inherit;font-weight:800;font-size:12px;padding:0 8px}
 .hdel.arm{background:#d93025;border-color:#d93025;color:#fff}
@@ -316,8 +328,9 @@ input:focus,input:focus-visible{outline:none}
       </div>
 
       <div id="fields">
-        <label class="lbl stp" for="phone" id="phoneLbl">رقم جوال السائق</label>
-        <div class="recent" id="favsBox" hidden><div class="rhead"><span class="rlbl" data-i18n="favLbl">المفضلة</span><button class="link" id="favEdit" type="button" data-i18n="favEdit" hidden>ترتيب</button></div><div class="rchips" id="favChips"></div></div>
+        <div class="lblrow"><label class="lbl stp" for="phone" id="phoneLbl">رقم جوال السائق</label><button class="favbtn" id="favBtn" type="button" aria-expanded="false" hidden><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.4L12 17.4l-5.7 3 1.1-6.4-4.6-4.5 6.4-.9z" fill="#ffc20e" stroke="#c98f00" stroke-width="1.2" stroke-linejoin="round"/></svg><span data-i18n="favLbl">المفضلة</span></button></div>
+        <div class="favpanel" id="favsBox" hidden><div id="favChips" class="favlist"></div><div class="favfoot"><button class="link" id="favEdit" type="button" data-i18n="favEdit">ترتيب</button></div></div>
+        
         <div class="recent" id="recent" hidden><span class="rlbl" data-i18n="recentLbl">آخر الأرقام</span><div class="rchips" id="rchips"></div></div>
         <div class="field">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
@@ -570,7 +583,7 @@ function favList(o) {
   return a;
 }
 function normFav(o) { favList(o).forEach(function (k, i) { o[k].o = i; }); }
-var favEditing = false;
+var favEditing = false, favOpen = false;
 function rhide() { try { var a = JSON.parse(load('rhide') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
 function favCount(o) { var c = 0; for (var k in o) if (o[k] && o[k].f) c++; return c; }
 function toast(msg, ms) { $('toast').textContent = msg; $('toast').hidden = false; setTimeout(function () { $('toast').hidden = true; }, ms || 3000); }
@@ -620,6 +633,18 @@ function chip(p, cls) {
   b.addEventListener('click', function () { setPhone(p); $('pname').value = n; $('pname').dataset.for = n ? p : ''; clr(); syncName(); });
   return b;
 }
+function favItem(p) {
+  var n = nameOf(p), b = document.createElement('button'); b.type = 'button'; b.className = 'favitem';
+  b.innerHTML = '<span class="av"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.4L12 17.4l-5.7 3 1.1-6.4-4.6-4.5 6.4-.9z" fill="#ffc20e" stroke="#c98f00" stroke-width="1.2" stroke-linejoin="round"/></svg></span>';
+  var nm = document.createElement('span'); nm.className = 'nm'; nm.appendChild(document.createTextNode(n || fmt(p)));
+  if (n) { var sm = document.createElement('small'); sm.textContent = fmt(p); nm.appendChild(sm); }
+  b.appendChild(nm);
+  b.addEventListener('click', function () {
+    setPhone(p); $('pname').value = n; $('pname').dataset.for = n ? p : ''; clr(); syncName();
+    favOpen = false; favEditing = false; renderRecent();
+  });
+  return b;
+}
 function moveFav(p, dir) {
   var o = getBook(), l = favList(o), i = l.indexOf(p), j = i + dir;
   if (i < 0 || j < 0 || j >= l.length) return;
@@ -653,13 +678,13 @@ function renderRecent() {
     if (h.merchant || !h.p || h.to !== to || seen[h.p] || hid.indexOf(h.p) > -1 || list.length >= 3) return;
     seen[h.p] = 1; list.push(h.p);
   });
-  if (!favs.length) favEditing = false;
-  $('favsBox').hidden = hide || !favs.length; $('favChips').innerHTML = '';
-  $('favEdit').hidden = favs.length < 1; $('favEdit').textContent = tr(favEditing ? 'favDone' : 'favEdit');
+  if (!favs.length) { favEditing = false; favOpen = false; }
+  $('favBtn').hidden = hide || !favs.length; $('favBtn').setAttribute('aria-expanded', favOpen ? 'true' : 'false');
+  $('favsBox').hidden = hide || !favs.length || !favOpen; $('favChips').innerHTML = '';
+  $('favEdit').textContent = tr(favEditing ? 'favDone' : 'favEdit');
   $('recent').hidden = hide || !list.length; $('rchips').innerHTML = '';
   if (hide) return;
-  $('favChips').className = favEditing ? 'rchips' : 'rchips fvrow';
-  favs.forEach(function (p, i) { $('favChips').appendChild(favEditing ? favRow(p, i, favs.length) : chip(p, 'fv')); });
+  favs.forEach(function (p, i) { $('favChips').appendChild(favEditing ? favRow(p, i, favs.length) : favItem(p)); });
   list.forEach(function (p) {
     var w = document.createElement('span'); w.className = 'rwrap';
     w.appendChild(chip(p));
@@ -669,6 +694,7 @@ function renderRecent() {
   });
 }
 $('favEdit').addEventListener('click', function () { favEditing = !favEditing; renderRecent(); });
+$('favBtn').addEventListener('click', function () { favOpen = !favOpen; if (!favOpen) favEditing = false; renderRecent(); });
 
 function showConfirm() {
   store('method', method); store('sim', sim); store('to', to);
