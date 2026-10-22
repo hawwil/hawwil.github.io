@@ -59,10 +59,11 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system
 .nrow{display:flex;gap:8px;margin:8px 0 0}.nrow input{flex:1;min-width:0;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit;font-size:15px;min-height:44px}
 .favb{flex:none;width:46px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:12px;cursor:pointer;display:grid;place-items:center;padding:0}
 .favb[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:var(--on-yellow)}
-.rchip.fv{direction:inherit;display:inline-flex;align-items:center;gap:9px;padding:5px 14px 5px 6px;min-height:46px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);font-weight:700;font-size:14px}
-.rchip.fv .av{flex:none;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--yellow) 28%,var(--surface));color:var(--ink);display:grid;place-items:center;font-family:"Cairo",sans-serif;font-weight:800;font-size:15px}
-.rchip.fv .tx{display:block;text-align:start;line-height:1.25}
-.rchip.fv small{margin-top:1px;font-size:11px;font-weight:500}.rchip small{display:block;font-size:11px;font-weight:600;color:var(--muted);direction:ltr}
+.rchips.fvrow{flex-wrap:nowrap;overflow-x:auto;gap:12px;padding:2px 2px 6px;scrollbar-width:none}.rchips.fvrow::-webkit-scrollbar{display:none}
+.rchip.fv{flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;background:transparent;border:0;box-shadow:none;padding:0;min-height:0;width:68px;border-radius:12px;direction:inherit;font-family:inherit}
+.rchip.fv .av{width:52px;height:52px;border-radius:50%;background:color-mix(in srgb,var(--yellow) 22%,var(--surface));border:1.5px solid color-mix(in srgb,var(--yellow) 55%,var(--line));display:grid;place-items:center;transition:transform .12s}
+.rchip.fv:active .av{transform:scale(.93)}
+.rchip.fv .tx{display:block;max-width:68px;font-size:12px;font-weight:700;line-height:1.25;color:var(--ink);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rchip small{display:block;font-size:11px;font-weight:600;color:var(--muted);direction:ltr}
 .hshare{flex:none;width:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;cursor:pointer;display:grid;place-items:center;padding:0}
 .rhead{display:flex;align-items:center;justify-content:space-between}.rhead .rlbl{margin-bottom:6px}.rhead .link{margin-bottom:4px}
 .favrow{display:flex;align-items:center;gap:8px;width:100%;background:var(--surface);border:1.5px solid var(--yellow);border-radius:14px;padding:6px 10px;margin-bottom:6px}
@@ -607,11 +608,13 @@ function chip(p, cls) {
   var b = document.createElement('button'); b.type = 'button'; b.className = 'rchip' + (cls ? ' ' + cls : '');
   var n = nameOf(p);
   if (cls === 'fv') {
-    var av = document.createElement('span'); av.className = 'av'; av.textContent = n ? Array.from(n)[0] : '\u2605'; b.appendChild(av);
+    var av = document.createElement('span'); av.className = 'av';
+    av.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.4L12 17.4l-5.7 3 1.1-6.4-4.6-4.5 6.4-.9z" fill="#ffc20e" stroke="#c98f00" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+    b.appendChild(av);
     var tx = document.createElement('span'); tx.className = 'tx';
-    tx.appendChild(document.createTextNode(n || fmt(p)));
-    if (n) { var sm2 = document.createElement('small'); sm2.textContent = fmt(p); tx.appendChild(sm2); }
+    tx.textContent = n || ('\u2026' + p.slice(-4));
     b.appendChild(tx);
+    b.setAttribute('aria-label', (n || fmt(p)) + ' ' + fmt(p));
   } else if (n) { b.appendChild(document.createTextNode(n)); var sm = document.createElement('small'); sm.textContent = fmt(p); b.appendChild(sm); }
   else b.textContent = fmt(p);
   b.addEventListener('click', function () { setPhone(p); $('pname').value = n; $('pname').dataset.for = n ? p : ''; clr(); syncName(); });
@@ -655,6 +658,7 @@ function renderRecent() {
   $('favEdit').hidden = favs.length < 1; $('favEdit').textContent = tr(favEditing ? 'favDone' : 'favEdit');
   $('recent').hidden = hide || !list.length; $('rchips').innerHTML = '';
   if (hide) return;
+  $('favChips').className = favEditing ? 'rchips' : 'rchips fvrow';
   favs.forEach(function (p, i) { $('favChips').appendChild(favEditing ? favRow(p, i, favs.length) : chip(p, 'fv')); });
   list.forEach(function (p) {
     var w = document.createElement('span'); w.className = 'rwrap';
