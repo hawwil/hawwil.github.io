@@ -55,6 +55,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system
 .hist-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px}
 .link{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:8px 4px;text-decoration:underline}
 .hitem{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:8px;font:inherit;color:var(--ink);cursor:pointer;text-align:start;box-shadow:var(--shadow)}
+.ver{display:block;margin-top:4px;font-size:10px;opacity:.5;letter-spacing:.5px}.ver:empty{display:none}
 .hrow{display:flex;align-items:stretch;gap:8px;margin-bottom:8px}.hrow .hitem{margin-bottom:0;flex:1;min-width:0}
 .hdel{flex:none;min-width:48px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:14px;cursor:pointer;display:grid;place-items:center;font:inherit;font-weight:800;font-size:12px;padding:0 8px}
 .hdel.arm{background:#d93025;border-color:#d93025;color:#fff}
@@ -350,7 +351,6 @@ input:focus,input:focus-visible{outline:none}
       <a class="cbtn ig" id="contact" href="#" target="_blank" rel="noopener"><span class="ig-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></span><span><b data-i18n="contact">تابعنا على إنستغرام</b><small>@nexa.ryx</small></span></a>
       <button class="cbtn" id="report" type="button" data-i18n="reportBtn">بلّغ عن مشكلة</button>
       <button class="cbtn" id="replay" type="button" data-i18n="replay">شاهد الشرح مرة ثانية</button>
-      <p class="note" id="swinfo" dir="ltr"></p>
       <button class="ghost" id="helpBack" type="button" data-i18n="back" style="margin-top:16px">رجوع</button>
     </section>
   </main>
@@ -362,7 +362,7 @@ input:focus,input:focus-visible{outline:none}
   <div class="back" id="ctaBack" style="display:none;padding-inline:16px">
     <button class="ghost" id="back" type="button" data-i18n="back">رجوع</button>
   </div>
-  <footer class="credit"><span class="disc" data-i18n="disc">حوّل أداة مساعدة وليست جهة مالية. التحويل بيتم عبر جوال باي أو بال باي.</span><span data-i18n="credit">تم التطوير من</span> <a id="nexaLink" href="#" target="_blank" rel="noopener">NEXA</a> <span data-i18n="creditSfx">للخدمات الرقمية</span><br><small>© 2026 NEXA · جميع الحقوق محفوظة</small></footer>
+  <footer class="credit"><span class="disc" data-i18n="disc">حوّل أداة مساعدة وليست جهة مالية. التحويل بيتم عبر جوال باي أو بال باي.</span><span data-i18n="credit">تم التطوير من</span> <a id="nexaLink" href="#" target="_blank" rel="noopener">NEXA</a> <span data-i18n="creditSfx">للخدمات الرقمية</span><br><small>© 2026 NEXA · جميع الحقوق محفوظة</small> <span class="ver" id="swinfo" dir="ltr"></span></footer>
 </div>
 
 <div class="onb" id="onb" hidden role="dialog" aria-modal="true">
@@ -908,9 +908,7 @@ $('theme').addEventListener('click', function () {
 // ----- تشغيل بدون إنترنت + إشعار التحديث -----
 (function () {
   var si = $('swinfo');
-  if (!('serviceWorker' in navigator)) { si.textContent = 'SW: not supported'; return; }
-  if (!/^https?:$/.test(location.protocol)) { si.textContent = 'SW: needs https'; return; }
-  si.textContent = 'build 5 · SW: registering...';
+  if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
   navigator.serviceWorker.addEventListener('message', function (e) {
     if (e.data && e.data.type === 'updated') $('upd').hidden = false;
   });
@@ -918,8 +916,8 @@ $('theme').addEventListener('click', function () {
   var hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadCtl) $('upd').hidden = false; hadCtl = true; });
   function info() {
-    var t = 'build 5 · SW: ' + (navigator.serviceWorker.controller ? 'active' : 'not controlling');
-    (window.caches ? caches.keys() : Promise.resolve([])).then(function (k) { $('swinfo').textContent = t + ' · cache: ' + (k.join(',') || 'none'); });
+    if (!window.caches) return;
+    caches.keys().then(function (k) { var m = (k[0] || '').match(/v(\d+)$/); if (m) si.textContent = 'v' + m[1]; });
   }
   navigator.serviceWorker.register('sw.js').then(function (reg) {
     setTimeout(info, 1500);
@@ -927,7 +925,7 @@ $('theme').addEventListener('click', function () {
     if (reg.waiting && navigator.serviceWorker.controller) $('upd').hidden = false;
     reg.addEventListener('updatefound', function () { watch(reg.installing); });
     document.addEventListener('visibilitychange', function () { if (!document.hidden) reg.update().catch(function () {}); });
-  }).catch(function (e) { si.textContent = 'SW error: ' + e; });
+  }).catch(function () {});
 })();
 
 (function init() {
