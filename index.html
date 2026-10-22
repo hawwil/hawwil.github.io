@@ -907,7 +907,10 @@ $('theme').addEventListener('click', function () {
 
 // ----- تشغيل بدون إنترنت + إشعار التحديث -----
 (function () {
-  if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+  var si = $('swinfo');
+  if (!('serviceWorker' in navigator)) { si.textContent = 'SW: not supported'; return; }
+  if (!/^https?:$/.test(location.protocol)) { si.textContent = 'SW: needs https'; return; }
+  si.textContent = 'build 5 · SW: registering...';
   navigator.serviceWorker.addEventListener('message', function (e) {
     if (e.data && e.data.type === 'updated') $('upd').hidden = false;
   });
@@ -915,7 +918,7 @@ $('theme').addEventListener('click', function () {
   var hadCtl = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadCtl) $('upd').hidden = false; hadCtl = true; });
   function info() {
-    var t = 'SW: ' + (navigator.serviceWorker.controller ? 'active' : 'not controlling');
+    var t = 'build 5 · SW: ' + (navigator.serviceWorker.controller ? 'active' : 'not controlling');
     (window.caches ? caches.keys() : Promise.resolve([])).then(function (k) { $('swinfo').textContent = t + ' · cache: ' + (k.join(',') || 'none'); });
   }
   navigator.serviceWorker.register('sw.js').then(function (reg) {
@@ -924,7 +927,7 @@ $('theme').addEventListener('click', function () {
     if (reg.waiting && navigator.serviceWorker.controller) $('upd').hidden = false;
     reg.addEventListener('updatefound', function () { watch(reg.installing); });
     document.addEventListener('visibilitychange', function () { if (!document.hidden) reg.update().catch(function () {}); });
-  }).catch(function () {});
+  }).catch(function (e) { si.textContent = 'SW error: ' + e; });
 })();
 
 (function init() {
