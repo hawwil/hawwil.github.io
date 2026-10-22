@@ -176,6 +176,8 @@ main{flex:1;padding:4px 16px 0}
 .m[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
 .m[aria-pressed="true"]::after{content:"";position:absolute;top:8px;inset-inline-start:8px;width:10px;height:10px;border-radius:50%;background:var(--yellow);border:2px solid var(--ink)}
 .m[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+.m-bop{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:12px;padding:12px}.m-bop small{display:block;margin:0}.m-bop>span:nth-child(2){font-size:14px}.bico{width:44px;height:44px;border-radius:12px;background:var(--track);display:grid;place-items:center;color:var(--ink)}
+.m-bop small{margin-inline-start:2px}
 .m small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
 
 /* Inputs */
@@ -225,6 +227,43 @@ input:focus,input:focus-visible{outline:none}
 .copy{flex:none;background:var(--track);color:var(--ink);border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;min-height:44px}
 .note{font-size:12px;color:var(--muted);text-align:center;margin:10px 0 0}
 .back{padding:12px 0 calc(20px + env(safe-area-inset-bottom,0px))}
+/* ===== UX layer (v1.4) ===== */
+:root{--ring:rgba(255,194,14,.35)}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.lbl{font-size:15px;font-weight:800;color:var(--ink);margin:26px 0 10px;display:flex;align-items:center;gap:10px}
+#form{counter-reset:st}
+.lbl.stp{counter-increment:st}
+.lbl.stp::before{content:counter(st);flex:none;width:24px;height:24px;border-radius:50%;background:var(--yellow);color:var(--on-yellow);display:grid;place-items:center;font-family:"Cairo",sans-serif;font-weight:800;font-size:13px;line-height:1}
+#form>.lbl:first-child{margin-top:6px}
+.field:focus-within{border-color:var(--yellow);box-shadow:0 0 0 4px var(--ring)}
+.field input::placeholder{opacity:.7}
+.m{padding:12px 4px 10px;transition:transform .12s ease,border-color .15s,background .15s}
+.m img{width:48px;height:48px}
+.m[aria-pressed="true"]{background:color-mix(in srgb,var(--yellow) 14%,var(--surface))}
+.pick button,.seg button,.seg2 button,.chip,.qa button,.rchip{transition:background .15s,color .15s,transform .12s}
+.m:active,.pick button:active,.chip:active,.qa button:active,.rchip:active,.hitem:active{transform:scale(.97)}
+.go,.dial{transition:transform .12s,filter .15s}
+.go:active,.dial:active{transform:scale(.98)}
+.go{font-size:18px;min-height:54px;border-radius:16px;box-shadow:0 6px 18px rgba(255,194,14,.28)}
+.cta{position:sticky;bottom:0;z-index:20;background:linear-gradient(to bottom,transparent,var(--bg) 28%);padding-top:26px}
+.hint{display:flex;align-items:center;justify-content:center;gap:6px}
+.qa button{min-height:46px;font-size:17px}
+.meter{border-radius:20px}
+.meter:focus-within{box-shadow:0 0 0 4px var(--ring)}
+.nx{list-style:none;margin:16px 0 0;padding:14px 16px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow);counter-reset:n}
+.nx[hidden]{display:none}
+.nx li{counter-increment:n;display:flex;align-items:flex-start;gap:12px;padding:8px 0;font-size:15px;font-weight:600;line-height:1.5}
+.nx li+li{border-top:1px solid var(--line)}
+.nx li::before{content:counter(n);flex:none;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:"Cairo",sans-serif;font-weight:800;font-size:13px;margin-top:1px}
+.dial{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;font-size:18px;border-radius:16px;box-shadow:0 6px 18px rgba(255,194,14,.28)}
+.row b{white-space:pre-line}
+.r-amount{font-size:44px}
+@keyframes pin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes print{from{clip-path:inset(0 0 100% 0);transform:translateY(-8px)}to{clip-path:inset(0);transform:none}}
+.panel.on{animation:pin .22s ease-out}
+#confirm.on .receipt{animation:print .42s cubic-bezier(.2,.8,.2,1)}
+.toast.upd{animation:pin .3s ease-out}
+@media (prefers-reduced-motion: reduce){.panel.on,#confirm.on .receipt,.toast.upd{animation:none!important}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -241,17 +280,18 @@ input:focus,input:focus-visible{outline:none}
 
   <main>
     <section id="form" class="panel on">
-      <span class="lbl" data-i18n="payTo">بدك تدفع إلى</span>
+      <span class="lbl stp" id="payToLbl" data-i18n="payTo">بدك تدفع إلى</span>
       <div class="pick" id="pick">
         <button type="button" data-to="driver" data-i18n="driver" aria-pressed="true">سائق</button>
         <button type="button" data-to="merchant" data-i18n="merchant" aria-pressed="false">تاجر</button>
         <button type="button" data-to="friend" data-i18n="friend" aria-pressed="false">صديق</button>
       </div>
 
-      <span class="lbl" data-i18n="payMethod">اختار وسيلة الدفع</span>
+      <span class="lbl stp" data-i18n="payMethod">اختار وسيلة الدفع</span>
       <div class="methods" id="methods">
         <button class="m" type="button" data-id="jawwal" aria-pressed="false"><img src="data:image/webp;base64,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" alt=""><span data-i18n="m_jawwal">جوال باي</span></button>
         <button class="m" type="button" data-id="palpay" aria-pressed="false"><img src="data:image/webp;base64,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" alt=""><span data-i18n="m_palpay">بال باي</span></button>
+        <button class="m m-bop" type="button" data-id="bop" aria-pressed="false"><span class="bico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18"/></svg></span><span data-i18n="m_bop">بنك فلسطين</span><small data-i18n="bopSub">بيفتح قائمة البنك</small></button>
       </div>
       <p class="err" id="e-method"></p>
 
@@ -265,7 +305,7 @@ input:focus,input:focus-visible{outline:none}
       </div>
 
       <div id="fields">
-        <label class="lbl" for="phone" id="phoneLbl">رقم جوال السائق</label>
+        <label class="lbl stp" for="phone" id="phoneLbl">رقم جوال السائق</label>
         <div class="recent" id="favsBox" hidden><span class="rlbl" data-i18n="favLbl">المفضلة</span><div class="rchips" id="favChips"></div></div>
         <div class="recent" id="recent" hidden><span class="rlbl" data-i18n="recentLbl">آخر الأرقام</span><div class="rchips" id="rchips"></div></div>
         <div class="field">
@@ -275,7 +315,7 @@ input:focus,input:focus-visible{outline:none}
         <div class="nrow"><input id="pname" type="text" maxlength="24" autocomplete="off" data-i18n-ph="namePh" placeholder="الاسم (اختياري)"><button class="favb" id="fav" type="button" aria-pressed="false" data-i18n-aria="favAria" aria-label="إضافة للمفضلة"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg></button></div>
         <p class="err" id="e-phone"></p>
 
-        <span class="lbl" data-i18n="amountLbl">المبلغ</span>
+        <span class="lbl stp" data-i18n="amountLbl">المبلغ</span>
         <div class="meter">
           <div class="meter-head"><span data-i18n="amountShekel">المبلغ بالشيكل</span><span>₪</span></div>
           <div class="mval"><input id="amount" type="text" inputmode="decimal" autocomplete="off" data-i18n-aria="amountShekel" aria-label="المبلغ بالشيكل"><span class="zero" id="zero" aria-hidden="true">0</span></div>
@@ -289,17 +329,18 @@ input:focus,input:focus-visible{outline:none}
     <section id="confirm" class="panel">
       <div class="receipt">
         <div class="r-top">
-          <p class="r-kicker" data-i18n="sending">بدك تحوّل</p>
+          <p class="r-kicker" id="c-kick" data-i18n="sending">بدك تحوّل</p>
           <p class="r-amount" id="c-amount"></p>
         </div>
         <div class="tear"></div>
         <div class="r-rows">
           <div class="row"><span data-i18n="via">عن طريق</span><b id="c-method"></b></div>
-          <div class="row"><span data-i18n="toNumber">إلى الرقم</span><b id="c-phone"></b></div>
+          <div class="row"><span id="c-phoneLbl" data-i18n="toNumber">إلى الرقم</span><b id="c-phone"></b></div>
         </div>
       </div>
       <p class="warn big" id="bigWarn" data-i18n="bigWarn" hidden>المبلغ كبير. تأكد إنك ما أضفت صفر زيادة.</p>
-      <p class="warn" data-i18n="confirmWarn">تأكد من الرقم والمبلغ، التحويل ما بيرجع.</p>
+      <ol class="nx" id="nx"><li data-i18n="nx1">اضغط "تأكيد واتصال"</li><li data-i18n="nx2">اكتب رمزك السري بشاشة الشركة. التطبيق ما بيشوفو.</li><li data-i18n="nx3">كمّل الخطوات وأكّد التحويل</li></ol>
+      <p class="warn" id="confirmWarn" data-i18n="confirmWarn">تأكد من الرقم والمبلغ، التحويل ما بيرجع.</p>
       <div class="steps" id="steps" hidden>
         <b class="st" data-i18n="stTitle">بعد ما يفتح الاتصال، اكتب بالترتيب:</b>
         <ol>
@@ -309,7 +350,7 @@ input:focus,input:focus-visible{outline:none}
           <li><span data-i18n="st4">اضغط 1 للتأكيد</span></li>
         </ol>
       </div>
-      <a class="dial" id="dial" href="#" target="_top" rel="noopener" data-i18n="confirmCall">تأكيد واتصال</a>
+      <a class="dial" id="dial" href="#" target="_top" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><span data-i18n="confirmCall">تأكيد واتصال</span></a>
       <div class="codebox" id="codebox" hidden>
         <div class="code" id="code"></div>
         <button class="copy" id="copy" type="button" data-i18n="copyBtn">نسخ</button>
@@ -402,6 +443,7 @@ input:focus,input:focus-visible{outline:none}
 // ===== الكودات: عدّل هون لو تغيّر أي كود =====
 var METHODS = {
   jawwal: { name: 'جوال باي', build: function (sim, p, a, pinFirst) { var pre = '*' + (sim === 'ooredoo' ? '268' : '110') + '*1'; return pinFirst ? pre + '#' : pre + '*' + p + '*' + a + '#'; } },
+  bop: { name: 'بنك فلسطين', build: function () { return '*267#'; } },
   palpay: { name: 'بال باي',  build: function (sim, p, a) { return '*370*1*1*' + p + '*' + a + '#'; } }
 };
 // =============================================
@@ -430,7 +472,10 @@ function paint() {
     b.setAttribute('aria-pressed', b.dataset.to === to ? 'true' : 'false');
   });
   $('phoneLbl').textContent = tr('lbl_' + to);
-  var onlyDial = (method === 'jawwal' && to === 'merchant');
+  var isBop = method === 'bop';
+  var onlyDial = isBop || (method === 'jawwal' && to === 'merchant');
+  $('pick').style.display = isBop ? 'none' : ''; $('payToLbl').style.display = isBop ? 'none' : '';
+  $('mNote').textContent = tr(isBop ? 'bopNote' : 'merchantNote');
   $('fields').style.display = onlyDial ? 'none' : 'block';
   $('mNote').style.display = onlyDial ? 'block' : 'none';
   $('simBox').style.display = method === 'jawwal' ? 'block' : 'none';
@@ -547,7 +592,7 @@ function chip(p, cls) {
   return b;
 }
 function renderRecent() {
-  var hide = (method === 'jawwal' && to === 'merchant');
+  var hide = (method === 'bop') || (method === 'jawwal' && to === 'merchant');
   var o = getBook(), favs = [], seen = {}, list = [];
   for (var k in o) if (o[k] && o[k].f) favs.push(k);
   favs.forEach(function (p) { seen[p] = 1; });
@@ -582,6 +627,7 @@ function show(name) {
 $('next').addEventListener('click', function () {
   clr();
   var ok = true;
+  if (method === 'bop') { showBop(); return; }
   if (method === 'jawwal' && to === 'merchant') { showMerchant(); return; }
   var p = cleanPhone($('phone').value);
   var a = parseFloat($('amount').value.replace(',', '.'));
@@ -615,6 +661,12 @@ $('copy').addEventListener('click', function () {
   fallback();
 });
 
+function showBop() {
+  last = { merchant: true, bop: true }; renderConfirm();
+  $('code').textContent = '*267#';
+  $('dial').setAttribute('href', 'tel:*267%23');
+  showConfirm();
+}
 function showMerchant() {
   var code = '*' + (sim === 'ooredoo' ? '268' : '110') + '*2#';
   last = { merchant: true }; renderConfirm();
@@ -661,7 +713,7 @@ var I18N = {
     tabSend: 'تحويل', tabHist: 'تحويلاتي', histNote: 'هون بتظهر التحويلات اللي فتحت اتصالها. بتنحفظ 30 يوم وبعدها بتنمسح تلقائياً. تأكد من رسالة الشركة إنه التحويل تم.', purged: 'تم مسح {n} تحويل أقدم من 30 يوم تلقائياً.', ok: 'تمام', histEmpty: 'ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هون.',
     copyBtn: 'نسخ', copied: 'تم النسخ', copyManual: 'انسخه يدوي', iosNote: 'على الآيفون: انسخ الكود، وافتح تطبيق الهاتف، والصقه واتصل.',
     delTitle: 'مسح كل التحويلات؟', delText: 'رح تنمسح {n} تحويل مسجّل على هالجوال، وما بتقدر ترجعهم.', delYes: 'نعم، امسح', delNo: 'لا، رجوع', delDone: 'تم مسح التحويلات',
-    tagline: 'مساعد تحويل أموال', recentLbl: 'آخر الأرقام',  favLbl: 'المفضلة', namePh: 'الاسم (اختياري)', favAria: 'إضافة للمفضلة', favMax: 'أقصى عدد للمفضلة 5. شيل واحد أول.', favNeed: 'اكتب الرقم أول', shareAria: 'مشاركة', shTitle: 'تحويل عبر حوّل', shTo: 'المستلم', shNum: 'الرقم', shAmt: 'المبلغ', shVia: 'الوسيلة',  clearAll: 'مسح كل السجل', delOne: 'مسح', delSure: 'متأكد؟',  reportBtn: 'بلّغ عن مشكلة', reportMsg: 'انسخت معلومات المشكلة. الصقها بالرسالة عنّا',  contactPick: 'اختيار من جهات الاتصال', errPickNo: 'ما لقينا رقم جوال صالح (059 أو 056) لهاي الجهة', updMsg: 'في تحديث جديد للتطبيق', updBtn: 'تحديث', helpAbout: 'حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.', disc: 'حوّل أداة مساعدة وليست جهة مالية. التحويل بيتم عبر جوال باي أو بال باي.',
+    tagline: 'مساعد تحويل أموال', recentLbl: 'آخر الأرقام', nx1: 'اضغط "تأكيد واتصال"', nx2: 'اكتب رمزك السري بشاشة الشركة. التطبيق ما بيشوفو.', nx3: 'كمّل الخطوات وأكّد التحويل',  bopSub: 'بيفتح قائمة البنك', bopStep: 'بعد الاتصال', bopNote: 'بنك فلسطين بيطلب الرمز السري أول شي. بعد ما يفتح الاتصال اكتب رمزك بشاشة البنك وكمّل الخطوات بنفسك. التطبيق ما بيشوف رمزك.', bopAfter: 'اكتب رمزك السري وكمّل بشاشة البنك',   favLbl: 'المفضلة', namePh: 'الاسم (اختياري)', favAria: 'إضافة للمفضلة', favMax: 'أقصى عدد للمفضلة 5. شيل واحد أول.', favNeed: 'اكتب الرقم أول', shareAria: 'مشاركة', shTitle: 'تحويل عبر حوّل', shTo: 'المستلم', shNum: 'الرقم', shAmt: 'المبلغ', shVia: 'الوسيلة',  clearAll: 'مسح كل السجل', delOne: 'مسح', delSure: 'متأكد؟',  reportBtn: 'بلّغ عن مشكلة', reportMsg: 'انسخت معلومات المشكلة. الصقها بالرسالة عنّا',  contactPick: 'اختيار من جهات الاتصال', errPickNo: 'ما لقينا رقم جوال صالح (059 أو 056) لهاي الجهة', updMsg: 'في تحديث جديد للتطبيق', updBtn: 'تحديث', helpAbout: 'حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.', disc: 'حوّل أداة مساعدة وليست جهة مالية. التحويل بيتم عبر جوال باي أو بال باي.',
     credit: 'تم التطوير من', creditSfx: 'للخدمات الرقمية', shekel: 'شيكل', payMerchant: 'دفع لتاجر', afterPin: 'بعد الرمز السري'
   },
   en: {
@@ -696,7 +748,7 @@ var I18N = {
     tabSend: 'Send', tabHist: 'My transfers', histNote: 'Transfers whose call you opened show up here. They are kept for 30 days, then deleted automatically. Check the provider’s message to confirm it went through.', purged: '{n} transfer(s) older than 30 days were deleted automatically.', ok: 'OK', histEmpty: 'No transfers yet. Your first transfer will show up here.',
     copyBtn: 'Copy', copied: 'Copied', copyManual: 'Copy it manually', iosNote: 'On iPhone: copy the code, open the Phone app, paste it and call.',
     delTitle: 'Delete all transfers?', delText: '{n} transfer(s) saved on this phone will be deleted. This can’t be undone.', delYes: 'Yes, delete', delNo: 'No, go back', delDone: 'Transfers deleted',
-    tagline: 'Money transfer assistant', recentLbl: 'Recent numbers',  favLbl: 'Favorites', namePh: 'Name (optional)', favAria: 'Add to favorites', favMax: 'Max 5 favorites. Remove one first.', favNeed: 'Enter the number first', shareAria: 'Share', shTitle: 'Transfer via Hawwil', shTo: 'To', shNum: 'Number', shAmt: 'Amount', shVia: 'Method',  clearAll: 'Clear all history', delOne: 'Delete', delSure: 'Sure?',  reportBtn: 'Report a problem', reportMsg: 'Problem details copied. Paste them in the message to us',  contactPick: 'Pick from contacts', errPickNo: 'No valid mobile number (059 or 056) found for this contact', updMsg: 'A new version is available', updBtn: 'Update', helpAbout: 'Hawwil is a money transfer assistant: it prepares the transfer code and opens the dialer. The transfer itself is made through Jawwal Pay or PalPay. The app never moves money or stores any PIN.', disc: 'Hawwil is a helper tool, not a financial institution. Transfers are made through Jawwal Pay or PalPay.',
+    tagline: 'Money transfer assistant', recentLbl: 'Recent numbers', nx1: 'Tap “Confirm and call”', nx2: 'Enter your PIN on the provider’s screen. The app never sees it.', nx3: 'Follow the steps and confirm the transfer',  bopSub: 'Opens the bank menu', bopStep: 'After the call', bopNote: 'Bank of Palestine asks for your PIN first. After the call opens, enter your PIN on the bank screen and continue the steps yourself. The app never sees your PIN.', bopAfter: 'Enter your PIN and continue on the bank screen',   favLbl: 'Favorites', namePh: 'Name (optional)', favAria: 'Add to favorites', favMax: 'Max 5 favorites. Remove one first.', favNeed: 'Enter the number first', shareAria: 'Share', shTitle: 'Transfer via Hawwil', shTo: 'To', shNum: 'Number', shAmt: 'Amount', shVia: 'Method',  clearAll: 'Clear all history', delOne: 'Delete', delSure: 'Sure?',  reportBtn: 'Report a problem', reportMsg: 'Problem details copied. Paste them in the message to us',  contactPick: 'Pick from contacts', errPickNo: 'No valid mobile number (059 or 056) found for this contact', updMsg: 'A new version is available', updBtn: 'Update', helpAbout: 'Hawwil is a money transfer assistant: it prepares the transfer code and opens the dialer. The transfer itself is made through Jawwal Pay or PalPay. The app never moves money or stores any PIN.', disc: 'Hawwil is a helper tool, not a financial institution. Transfers are made through Jawwal Pay or PalPay.',
     credit: 'Developed by', creditSfx: 'Digital Services', shekel: '₪', payMerchant: 'Pay a merchant', afterPin: 'After your PIN'
   }
 };
@@ -704,18 +756,24 @@ function tr(k) { return (I18N[lang] && I18N[lang][k]) || I18N.ar[k] || k; }
 function renderConfirm() {
   if (!last) return;
   var showSteps = method === 'jawwal' && !last.merchant && isPF();
-  $('steps').hidden = !showSteps;
+  $('steps').hidden = !showSteps; $('nx').hidden = showSteps;
   if (showSteps) { $('st-phone').textContent = last.p; $('st-amt').textContent = last.amt; }
   $('bigWarn').hidden = !(!last.merchant && parseFloat(last.amt) >= BIG);
   var simTxt = method === 'jawwal' ? ' (' + tr(sim === 'ooredoo' ? 'ooredoo' : 'jawwal') + ')' : '';
-  if (last.merchant) {
+  $('c-kick').style.display = last.bop ? 'none' : ''; $('confirmWarn').style.display = last.bop ? 'none' : '';
+  $('c-phoneLbl').textContent = tr(last.bop ? 'bopStep' : 'toNumber');
+  if (last.bop) {
+    $('c-amount').textContent = tr('m_bop');
+    $('c-method').textContent = tr('m_bop');
+    $('c-phone').textContent = tr('bopAfter');
+  } else if (last.merchant) {
     $('c-amount').textContent = tr('payMerchant');
     $('c-method').textContent = tr('m_jawwal') + simTxt;
     $('c-phone').textContent = tr('afterPin');
   } else {
     $('c-amount').textContent = last.amt + ' ' + tr('shekel');
     $('c-method').textContent = tr('m_' + method) + simTxt;
-    $('c-phone').textContent = last.p;
+    var nm = ($('pname').value || '').trim() || nameOf(last.p); $('c-phone').textContent = (nm ? nm + '\n' : '') + '\u2066' + fmt(last.p) + '\u2069';
   }
 }
 function applyLang(l) {
@@ -821,7 +879,7 @@ function renderHist() {
     var b = document.createElement('button'); b.type = 'button'; b.className = 'hitem';
     var wrap = document.createElement('div');
     var hn = h.merchant ? '' : nameOf(h.p);
-    var l1 = document.createElement('b'); l1.textContent = h.merchant ? tr('payMerchant') : (hn || fmt(h.p));
+    var l1 = document.createElement('b'); l1.textContent = h.merchant ? tr(h.m === 'bop' ? 'm_bop' : 'payMerchant') : (hn || fmt(h.p));
     if (hn) l1.style.direction = 'inherit';
     var l2 = document.createElement('span');
     var role = (hn ? fmt(h.p) + ' · ' : '') + ((h.to && I18N.ar[h.to] && !h.merchant) ? tr(h.to) + ' · ' : '');
@@ -970,6 +1028,17 @@ $('theme').addEventListener('click', function () {
   }
   applyTheme(t);
 })();
+
+// ----- لمسات استخدام: نص زر "تابع" ديناميكي + اهتزاز خفيف -----
+function updCta() {
+  var a = parseFloat(($('amount').value || '').replace(',', '.')), only = method === 'bop' || (method === 'jawwal' && to === 'merchant');
+  $('next').textContent = (!only && a > 0) ? tr('cont') + ' · ' + (Math.round(a * 100) / 100) + ' ' + tr('shekel') : tr('cont');
+}
+['input', 'click'].forEach(function (ev) { document.addEventListener(ev, function () { setTimeout(updCta, 0); }); });
+document.addEventListener('click', function (e) {
+  var t = e.target.closest && e.target.closest('button,.dial,.m');
+  if (t && navigator.vibrate) { try { navigator.vibrate(8); } catch (x) {} }
+});
 
 // ----- عدّاد استخدام بدون بيانات شخصية (يتخزّن محلياً ويُرسل لما يتصل الجهاز) -----
 var gcReady = false;
