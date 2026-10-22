@@ -56,6 +56,11 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system
 .link{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:8px 4px;text-decoration:underline}
 .hitem{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:8px;font:inherit;color:var(--ink);cursor:pointer;text-align:start;box-shadow:var(--shadow)}
 .ver{display:block;margin-top:4px;font-size:10px;opacity:.5;letter-spacing:.5px}.ver:empty{display:none}
+.nrow{display:flex;gap:8px;margin:8px 0 0}.nrow input{flex:1;min-width:0;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit;font-size:15px;min-height:44px}
+.favb{flex:none;width:46px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:12px;cursor:pointer;display:grid;place-items:center;padding:0}
+.favb[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:var(--on-yellow)}
+.rchip.fv{border-color:var(--yellow);direction:inherit}.rchip small{display:block;font-size:11px;font-weight:600;color:var(--muted);direction:ltr}
+.hshare{flex:none;width:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;cursor:pointer;display:grid;place-items:center;padding:0}
 .hrow{display:flex;align-items:stretch;gap:8px;margin-bottom:8px}.hrow .hitem{margin-bottom:0;flex:1;min-width:0}
 .hdel{flex:none;min-width:48px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:14px;cursor:pointer;display:grid;place-items:center;font:inherit;font-weight:800;font-size:12px;padding:0 8px}
 .hdel.arm{background:#d93025;border-color:#d93025;color:#fff}
@@ -261,11 +266,13 @@ input:focus,input:focus-visible{outline:none}
 
       <div id="fields">
         <label class="lbl" for="phone" id="phoneLbl">رقم جوال السائق</label>
+        <div class="recent" id="favsBox" hidden><span class="rlbl" data-i18n="favLbl">المفضلة</span><div class="rchips" id="favChips"></div></div>
         <div class="recent" id="recent" hidden><span class="rlbl" data-i18n="recentLbl">آخر الأرقام</span><div class="rchips" id="rchips"></div></div>
         <div class="field">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
           <input id="phone" type="tel" inputmode="numeric" maxlength="24" placeholder="05X XXX XXXX" autocomplete="off"><button class="cpick" id="cpick" type="button" hidden data-i18n-aria="contactPick" aria-label="اختيار من جهات الاتصال"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></button>
         </div>
+        <div class="nrow"><input id="pname" type="text" maxlength="24" autocomplete="off" data-i18n-ph="namePh" placeholder="الاسم (اختياري)"><button class="favb" id="fav" type="button" aria-pressed="false" data-i18n-aria="favAria" aria-label="إضافة للمفضلة"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg></button></div>
         <p class="err" id="e-phone"></p>
 
         <span class="lbl" data-i18n="amountLbl">المبلغ</span>
@@ -497,22 +504,62 @@ if ('contacts' in navigator && window.ContactsManager) {
     }).catch(function () {});
   });
 }
-// آخر المستلمين (من تحويلاتي، حسب نوع المستلم)
+// دفتر الأسماء والمفضلة (محفوظ على الجوال بس)
+function getBook() { try { var o = JSON.parse(load('book') || '{}'); return (o && typeof o === 'object' && !Array.isArray(o)) ? o : {}; } catch (e) { return {}; } }
+function saveBook(o) { store('book', JSON.stringify(o)); }
+function nameOf(p) { var b = getBook()[p]; return b && b.n ? b.n : ''; }
+function favCount(o) { var c = 0; for (var k in o) if (o[k] && o[k].f) c++; return c; }
+function toast(msg, ms) { $('toast').textContent = msg; $('toast').hidden = false; setTimeout(function () { $('toast').hidden = true; }, ms || 3000); }
+function syncName() {
+  var d = cleanPhone($('phone').value), ok = /^(059|056)\d{7}$/.test(d), b = ok ? getBook()[d] : null;
+  if (ok && b && b.n && !$('pname').value) { $('pname').value = b.n; $('pname').dataset.for = d; }
+  $('fav').setAttribute('aria-pressed', b && b.f ? 'true' : 'false');
+}
+function saveName(p) {
+  var n = $('pname').value.trim(), o = getBook(), cur = o[p] || {};
+  if (!n && !cur.n && !cur.f) return;
+  o[p] = { n: n || cur.n || '', f: cur.f ? 1 : 0 };
+  saveBook(o);
+}
+$('pname').addEventListener('input', function () { var d = cleanPhone($('phone').value); this.dataset.for = /^(059|056)\d{7}$/.test(d) ? d : ''; clr(); });
+$('phone').addEventListener('input', function () {
+  var d = cleanPhone($('phone').value), ok = /^(059|056)\d{7}$/.test(d), f = $('pname').dataset.for || '';
+  if (f && f !== d) { $('pname').value = ''; $('pname').dataset.for = ''; }
+  syncName();
+  if (ok && $('pname').value && !$('pname').dataset.for) $('pname').dataset.for = d;
+});
+$('fav').addEventListener('click', function () {
+  var d = cleanPhone($('phone').value);
+  if (!/^(059|056)\d{7}$/.test(d)) { toast(tr('favNeed')); return; }
+  var o = getBook(), cur = o[d] || { n: '', f: 0 };
+  if (!cur.f && favCount(o) >= 5) { toast(tr('favMax'), 3500); return; }
+  cur.f = cur.f ? 0 : 1; cur.n = $('pname').value.trim() || cur.n || '';
+  o[d] = cur; saveBook(o);
+  if (!cur.f && !cur.n) delete o[d], saveBook(o);
+  syncName(); renderRecent();
+});
+function chip(p, cls) {
+  var b = document.createElement('button'); b.type = 'button'; b.className = 'rchip' + (cls ? ' ' + cls : '');
+  var n = nameOf(p);
+  if (n) { b.appendChild(document.createTextNode(n)); var sm = document.createElement('small'); sm.textContent = fmt(p); b.appendChild(sm); }
+  else b.textContent = fmt(p);
+  b.addEventListener('click', function () { setPhone(p); $('pname').value = n; $('pname').dataset.for = n ? p : ''; clr(); syncName(); });
+  return b;
+}
 function renderRecent() {
-  var box = $('recent'), seen = {}, list = [];
+  var hide = (method === 'jawwal' && to === 'merchant');
+  var o = getBook(), favs = [], seen = {}, list = [];
+  for (var k in o) if (o[k] && o[k].f) favs.push(k);
+  favs.forEach(function (p) { seen[p] = 1; });
   getHist().forEach(function (h) {
     if (h.merchant || !h.p || h.to !== to || seen[h.p] || list.length >= 3) return;
     seen[h.p] = 1; list.push(h.p);
   });
-  var hide = !list.length || (method === 'jawwal' && to === 'merchant');
-  box.hidden = hide;
-  $('rchips').innerHTML = '';
+  $('favsBox').hidden = hide || !favs.length; $('favChips').innerHTML = '';
+  $('recent').hidden = hide || !list.length; $('rchips').innerHTML = '';
   if (hide) return;
-  list.forEach(function (p) {
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'rchip'; b.textContent = fmt(p);
-    b.addEventListener('click', function () { setPhone(p); clr(); });
-    $('rchips').appendChild(b);
-  });
+  favs.forEach(function (p) { $('favChips').appendChild(chip(p, 'fv')); });
+  list.forEach(function (p) { $('rchips').appendChild(chip(p)); });
 }
 
 function showConfirm() {
@@ -614,7 +661,7 @@ var I18N = {
     tabSend: 'تحويل', tabHist: 'تحويلاتي', histNote: 'هون بتظهر التحويلات اللي فتحت اتصالها. بتنحفظ 30 يوم وبعدها بتنمسح تلقائياً. تأكد من رسالة الشركة إنه التحويل تم.', purged: 'تم مسح {n} تحويل أقدم من 30 يوم تلقائياً.', ok: 'تمام', histEmpty: 'ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هون.',
     copyBtn: 'نسخ', copied: 'تم النسخ', copyManual: 'انسخه يدوي', iosNote: 'على الآيفون: انسخ الكود، وافتح تطبيق الهاتف، والصقه واتصل.',
     delTitle: 'مسح كل التحويلات؟', delText: 'رح تنمسح {n} تحويل مسجّل على هالجوال، وما بتقدر ترجعهم.', delYes: 'نعم، امسح', delNo: 'لا، رجوع', delDone: 'تم مسح التحويلات',
-    tagline: 'مساعد تحويل أموال', recentLbl: 'آخر الأرقام', clearAll: 'مسح كل السجل', delOne: 'مسح', delSure: 'متأكد؟',  reportBtn: 'بلّغ عن مشكلة', reportMsg: 'انسخت معلومات المشكلة. الصقها بالرسالة عنّا',  contactPick: 'اختيار من جهات الاتصال', errPickNo: 'ما لقينا رقم جوال صالح (059 أو 056) لهاي الجهة', updMsg: 'في تحديث جديد للتطبيق', updBtn: 'تحديث', helpAbout: 'حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.', disc: 'حوّل أداة مساعدة وليست جهة مالية. التحويل بيتم عبر جوال باي أو بال باي.',
+    tagline: 'مساعد تحويل أموال', recentLbl: 'آخر الأرقام', favLbl: 'المفضلة', namePh: 'الاسم (اختياري)', favAria: 'إضافة للمفضلة', favMax: 'أقصى عدد للمفضلة 5. شيل واحد أول.', favNeed: 'اكتب الرقم أول', shareAria: 'مشاركة', shTitle: 'تحويل عبر حوّل', shTo: 'المستلم', shAmt: 'المبلغ', shVia: 'الوسيلة',  clearAll: 'مسح كل السجل', delOne: 'مسح', delSure: 'متأكد؟',  reportBtn: 'بلّغ عن مشكلة', reportMsg: 'انسخت معلومات المشكلة. الصقها بالرسالة عنّا',  contactPick: 'اختيار من جهات الاتصال', errPickNo: 'ما لقينا رقم جوال صالح (059 أو 056) لهاي الجهة', updMsg: 'في تحديث جديد للتطبيق', updBtn: 'تحديث', helpAbout: 'حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.', disc: 'حوّل أداة مساعدة وليست جهة مالية. التحويل بيتم عبر جوال باي أو بال باي.',
     credit: 'تم التطوير من', creditSfx: 'للخدمات الرقمية', shekel: 'شيكل', payMerchant: 'دفع لتاجر', afterPin: 'بعد الرمز السري'
   },
   en: {
@@ -649,7 +696,7 @@ var I18N = {
     tabSend: 'Send', tabHist: 'My transfers', histNote: 'Transfers whose call you opened show up here. They are kept for 30 days, then deleted automatically. Check the provider’s message to confirm it went through.', purged: '{n} transfer(s) older than 30 days were deleted automatically.', ok: 'OK', histEmpty: 'No transfers yet. Your first transfer will show up here.',
     copyBtn: 'Copy', copied: 'Copied', copyManual: 'Copy it manually', iosNote: 'On iPhone: copy the code, open the Phone app, paste it and call.',
     delTitle: 'Delete all transfers?', delText: '{n} transfer(s) saved on this phone will be deleted. This can’t be undone.', delYes: 'Yes, delete', delNo: 'No, go back', delDone: 'Transfers deleted',
-    tagline: 'Money transfer assistant', recentLbl: 'Recent numbers', clearAll: 'Clear all history', delOne: 'Delete', delSure: 'Sure?',  reportBtn: 'Report a problem', reportMsg: 'Problem details copied. Paste them in the message to us',  contactPick: 'Pick from contacts', errPickNo: 'No valid mobile number (059 or 056) found for this contact', updMsg: 'A new version is available', updBtn: 'Update', helpAbout: 'Hawwil is a money transfer assistant: it prepares the transfer code and opens the dialer. The transfer itself is made through Jawwal Pay or PalPay. The app never moves money or stores any PIN.', disc: 'Hawwil is a helper tool, not a financial institution. Transfers are made through Jawwal Pay or PalPay.',
+    tagline: 'Money transfer assistant', recentLbl: 'Recent numbers', favLbl: 'Favorites', namePh: 'Name (optional)', favAria: 'Add to favorites', favMax: 'Max 5 favorites. Remove one first.', favNeed: 'Enter the number first', shareAria: 'Share', shTitle: 'Transfer via Hawwil', shTo: 'To', shAmt: 'Amount', shVia: 'Method',  clearAll: 'Clear all history', delOne: 'Delete', delSure: 'Sure?',  reportBtn: 'Report a problem', reportMsg: 'Problem details copied. Paste them in the message to us',  contactPick: 'Pick from contacts', errPickNo: 'No valid mobile number (059 or 056) found for this contact', updMsg: 'A new version is available', updBtn: 'Update', helpAbout: 'Hawwil is a money transfer assistant: it prepares the transfer code and opens the dialer. The transfer itself is made through Jawwal Pay or PalPay. The app never moves money or stores any PIN.', disc: 'Hawwil is a helper tool, not a financial institution. Transfers are made through Jawwal Pay or PalPay.',
     credit: 'Developed by', creditSfx: 'Digital Services', shekel: '₪', payMerchant: 'Pay a merchant', afterPin: 'After your PIN'
   }
 };
@@ -677,6 +724,7 @@ function applyLang(l) {
   root.setAttribute('lang', l);
   root.setAttribute('dir', l === 'ar' ? 'rtl' : 'ltr');
   document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = tr(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.setAttribute('placeholder', tr(el.getAttribute('data-i18n-ph'))); });
   document.querySelectorAll('[data-i18n-aria]').forEach(function (el) { el.setAttribute('aria-label', tr(el.getAttribute('data-i18n-aria'))); });
   $('lang').textContent = $('onbLang').textContent = l === 'ar' ? 'EN' : 'عربي';
   document.title = tr('brand');
@@ -772,9 +820,11 @@ function renderHist() {
   list.forEach(function (h) {
     var b = document.createElement('button'); b.type = 'button'; b.className = 'hitem';
     var wrap = document.createElement('div');
-    var l1 = document.createElement('b'); l1.textContent = h.merchant ? tr('payMerchant') : fmt(h.p);
+    var hn = h.merchant ? '' : nameOf(h.p);
+    var l1 = document.createElement('b'); l1.textContent = h.merchant ? tr('payMerchant') : (hn || fmt(h.p));
+    if (hn) l1.style.direction = 'inherit';
     var l2 = document.createElement('span');
-    var role = (h.to && I18N.ar[h.to] && !h.merchant) ? tr(h.to) + ' · ' : '';
+    var role = (hn ? fmt(h.p) + ' · ' : '') + ((h.to && I18N.ar[h.to] && !h.merchant) ? tr(h.to) + ' · ' : '');
     l2.textContent = role + tr('m_' + h.m) + (h.m === 'jawwal' ? ' (' + tr(h.s === 'ooredoo' ? 'ooredoo' : 'jawwal') + ')' : '') + (h.merchant ? '' : ' · ' + h.a + ' ' + tr('shekel'));
     if (h.merchant) l1.style.direction = 'inherit';
     wrap.appendChild(l1); wrap.appendChild(l2);
@@ -798,7 +848,17 @@ function renderHist() {
       if (k > -1) { a.splice(k, 1); store('hist', JSON.stringify(a)); }
       renderHist();
     });
-    row.appendChild(b); row.appendChild(d); box.appendChild(row);
+    row.appendChild(b);
+    if (!h.merchant) {
+      var sh = document.createElement('button'); sh.type = 'button'; sh.className = 'hshare'; sh.setAttribute('aria-label', tr('shareAria'));
+      sh.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+      sh.addEventListener('click', function () {
+        var txt = [tr('shTitle'), tr('shTo') + ': ' + (hn ? hn + ' (' + fmt(h.p) + ')' : fmt(h.p)), tr('shAmt') + ': ' + h.a + ' ' + tr('shekel'), tr('shVia') + ': ' + tr('m_' + h.m), when(h.t)].join('\n');
+        window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener');
+      });
+      row.appendChild(sh);
+    }
+    row.appendChild(d); box.appendChild(row);
   });
 }
 document.querySelectorAll('#filters [data-f]').forEach(function (b) {
@@ -819,13 +879,13 @@ $('dTo').addEventListener('change', function () { hf.to = this.value; renderHist
 function useHist(h) {
   if (!METHODS[h.m]) return;
   method = h.m; sim = h.s === 'ooredoo' ? 'ooredoo' : 'jawwal'; to = LABELS[h.to] ? h.to : 'driver';
-  if (!h.merchant) { $('phone').value = fmt(h.p); $('amount').value = String(h.a); $('zero').style.display = 'none'; markQa(); }
+  if (!h.merchant) { $('phone').value = fmt(h.p); $('amount').value = String(h.a); $('zero').style.display = 'none'; markQa(); $('pname').value = nameOf(h.p); $('pname').dataset.for = $('pname').value ? h.p : ''; syncName(); }
   paint(); show('form'); $('next').click();
 }
 $('dial').addEventListener('click', function () {
   if (!last) return;
   if (last.merchant) pushHist({ m: method, s: sim, to: 'merchant', merchant: true, t: Date.now() });
-  else pushHist({ m: method, s: sim, to: to, p: last.p, a: last.amt, t: Date.now() });
+  else { pushHist({ m: method, s: sim, to: to, p: last.p, a: last.amt, t: Date.now() }); saveName(last.p); }
 });
 document.querySelectorAll('#tabs button').forEach(function (b) {
   b.addEventListener('click', function () { show(b.id === 'tabHist' ? 'hist' : 'form'); });
