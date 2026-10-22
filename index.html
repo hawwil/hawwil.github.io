@@ -858,7 +858,8 @@ function renderHist() {
         if (hn) lines.push(tr('shTo') + ': ' + hn);
         lines.push(tr('shNum') + ': ' + fmt(h.p), tr('shAmt') + ': ' + h.a + ' ' + tr('shekel'), tr('shVia') + ': ' + tr('m_' + h.m), when(h.t));
         var txt = lines.map(function (l) { return R + l; }).join('\n');
-        window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener');
+        if (navigator.share) { navigator.share({ text: txt }).catch(function () {}); }
+        else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener'); }
       });
       row.appendChild(sh);
     }
