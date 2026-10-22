@@ -101,6 +101,16 @@ details p{margin:0 0 12px;color:var(--muted);font-size:14px}
 .toast{position:fixed;inset-inline:16px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:40;max-width:408px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:700;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .toast[hidden]{display:none}
 .simhelp{margin:0 0 10px;font-size:13px;color:var(--muted)}
+.pfbox{margin-top:16px}
+.steps{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:14px 16px;margin:16px 0 0}
+.steps b.st{display:block;margin-bottom:8px;font-size:15px}
+.steps ol{margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+.steps li:first-of-type{border-top:0}
+.steps li:before{content:counter(s);flex:none;width:24px;height:24px;border-radius:50%;background:var(--yellow);color:var(--on-yellow);display:grid;place-items:center;font-size:13px;font-weight:800}
+.steps li span{flex:1}
+.steps li bdi{font-weight:800;direction:ltr;unicode-bidi:isolate}
+.steps .cp{flex:none;border:0;border-radius:10px;padding:8px 12px;background:var(--track);color:var(--ink);font:inherit;font-weight:700;font-size:13px;cursor:pointer;min-height:36px}
 .range{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:-4px 0 12px}
 .range[hidden]{display:none}
 .range label{display:block;font-size:12px;font-weight:700;color:var(--muted)}
@@ -128,11 +138,11 @@ main{flex:1;padding:4px 16px 0}
 #form>.lbl:first-child{margin-top:4px}
 
 /* Segmented */
-.pick,.seg{display:grid;background:var(--track);border-radius:14px;padding:4px;gap:4px}
+.pick,.seg,.seg2{display:grid;background:var(--track);border-radius:14px;padding:4px;gap:4px}
 .pick{grid-template-columns:repeat(3,minmax(0,1fr))}
-.seg{grid-template-columns:repeat(2,minmax(0,1fr))}
-.pick button,.seg button{background:transparent;color:var(--muted);border:0;border-radius:10px;padding:10px 6px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;min-height:44px}
-.pick button[aria-pressed="true"],.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.seg,.seg2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pick button,.seg button,.seg2 button{background:transparent;color:var(--muted);border:0;border-radius:10px;padding:10px 6px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;min-height:44px}
+.pick button[aria-pressed="true"],.seg button[aria-pressed="true"],.seg2 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
 
 /* Methods */
 .methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -258,6 +268,15 @@ input:focus,input:focus-visible{outline:none}
       </div>
       <p class="warn big" id="bigWarn" data-i18n="bigWarn" hidden>المبلغ كبير. تأكد إنك ما أضفت صفر زيادة.</p>
       <p class="warn" data-i18n="confirmWarn">تأكد من الرقم والمبلغ، التحويل ما بيرجع.</p>
+      <div class="steps" id="steps" hidden>
+        <b class="st" data-i18n="stTitle">بعد ما يفتح الاتصال، اكتب بالترتيب:</b>
+        <ol>
+          <li><span data-i18n="st1">الرمز السري (4 أرقام)</span></li>
+          <li><span><span data-i18n="st2">رقم المستلم:</span> <bdi id="st-phone"></bdi></span><button class="cp" type="button" data-cp="phone" data-i18n="copyBtn">نسخ</button></li>
+          <li><span><span data-i18n="st3">المبلغ:</span> <bdi id="st-amt"></bdi></span><button class="cp" type="button" data-cp="amt" data-i18n="copyBtn">نسخ</button></li>
+          <li><span data-i18n="st4">اضغط 1 للتأكيد</span></li>
+        </ol>
+      </div>
       <a class="dial" id="dial" href="#" target="_top" rel="noopener" data-i18n="confirmCall">تأكيد واتصال</a>
       <div class="codebox" id="codebox" hidden>
         <div class="code" id="code"></div>
@@ -347,10 +366,12 @@ input:focus,input:focus-visible{outline:none}
 <script>
 // ===== الكودات: عدّل هون لو تغيّر أي كود =====
 var METHODS = {
-  jawwal: { name: 'جوال باي', build: function (sim, p, a) { return '*' + (sim === 'ooredoo' ? '268' : '110') + '*1*' + p + '*' + a + '#'; } },
+  jawwal: { name: 'جوال باي', build: function (sim, p, a, pinFirst) { var pre = '*' + (sim === 'ooredoo' ? '268' : '110') + '*1'; return pinFirst ? pre + '#' : pre + '*' + p + '*' + a + '#'; } },
   palpay: { name: 'بال باي',  build: function (sim, p, a) { return '*370*1*1*' + p + '*' + a + '#'; } }
 };
 // =============================================
+var pf = null;   // هل المحفظة بتطلب الرمز السري أول؟ (null = حسب الشريحة)
+function isPF() { return sim === 'jawwal'; }   // شريحة جوال: الرمز السري أول
 var method = null, sim = 'jawwal', to = 'driver', last = null, lang = 'ar';
 var BIG = 100;            // فوق هالمبلغ بتطلع رسالة تنبيه
 var IG_URL = 'https://www.instagram.com/nexa.ryx/';   // صفحة NEXA على إنستغرام
@@ -366,6 +387,9 @@ function paint() {
   });
   document.querySelectorAll('.seg button').forEach(function (b) {
     b.setAttribute('aria-pressed', b.dataset.sim === sim ? 'true' : 'false');
+  });
+  document.querySelectorAll('.seg2 button').forEach(function (b) {
+    b.setAttribute('aria-pressed', (b.dataset.pf === '1') === isPF() ? 'true' : 'false');
   });
   document.querySelectorAll('#pick button').forEach(function (b) {
     b.setAttribute('aria-pressed', b.dataset.to === to ? 'true' : 'false');
@@ -383,6 +407,19 @@ document.querySelectorAll('#methods .m').forEach(function (b) {
 });
 document.querySelectorAll('.seg button').forEach(function (b) {
   b.addEventListener('click', function () { sim = b.dataset.sim; paint(); });
+});
+document.querySelectorAll('.seg2 button').forEach(function (b) {
+  b.addEventListener('click', function () { pf = b.dataset.pf === '1'; store('pf', pf ? '1' : '0'); paint(); });
+});
+document.querySelectorAll('#steps .cp').forEach(function (b) {
+  b.addEventListener('click', function () {
+    if (!last) return;
+    var t = b.dataset.cp === 'phone' ? last.p : last.amt, btn = b;
+    function ok() { btn.textContent = tr('copied'); setTimeout(function () { btn.textContent = tr('copyBtn'); }, 1500); }
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(ok, function () {}); return; } } catch (e) {}
+    var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); ok(); } catch (e) {} document.body.removeChild(ta);
+  });
 });
 document.querySelectorAll('#pick button').forEach(function (b) {
   b.addEventListener('click', function () { to = b.dataset.to; paint(); });
@@ -423,7 +460,7 @@ $('next').addEventListener('click', function () {
   if (!(a > 0)) { $('e-amount').textContent = tr('errAmount'); ok = false; }
   if (!ok) return;
   var amt = String(Math.round(a * 100) / 100);
-  var code = METHODS[method].build(sim, p, amt);
+  var code = METHODS[method].build(sim, p, amt, isPF());
   last = { amt: amt, p: p }; renderConfirm();
   $('code').textContent = code;
   $('dial').setAttribute('href', 'tel:' + code.replace(/#/g, '%23'));
@@ -467,6 +504,7 @@ var I18N = {
     payTo: 'بدك تدفع إلى', driver: 'سائق', merchant: 'تاجر', friend: 'صديق',
     payMethod: 'اختار وسيلة الدفع', m_jawwal: 'جوال باي', m_palpay: 'بال باي', m_bop: 'بنك فلسطين', soon: 'قريباً',
     simLbl: 'الشريحة المفعّل عليها محفظة جوال باي', simHelp: 'اختار نوع الشريحة اللي مفعّلة عليها المحفظة. لو جوالك فيه شريحتين، اتصل من نفس الشريحة.', simJ: 'شريحة جوال', simO: 'شريحة أوريدو', jawwal: 'جوال', ooredoo: 'أوريدو',
+    pfLbl: 'متى بتطلب المحفظة الرمز السري؟', pfHelp: 'اتصل بـ*110# وشوف: لو طلبت الرمز السري قبل رقم الصديق اختار "أول".', pfLast: 'بالآخر (كود كامل)', pfFirst: 'أول (خطوات)', stTitle: 'بعد ما يفتح الاتصال، اكتب بالترتيب:', st1: 'الرمز السري (4 أرقام)', st2: 'رقم المستلم:', st3: 'المبلغ:', st4: 'اضغط 1 للتأكيد',
     lbl_driver: 'رقم جوال السائق', lbl_merchant: 'رقم جوال التاجر', lbl_friend: 'رقم جوال الصديق',
     amountLbl: 'المبلغ', amountShekel: 'المبلغ بالشيكل',
     merchantNote: 'الدفع لتاجر بجوال باي بيطلب الرمز السري قبل رقم التاجر، فما بنقدر نكتب الرقم والمبلغ مسبقاً. بعد ما يفتح الاتصال: اكتب رمزك السري، وبعدين رقم التاجر والمبلغ.',
@@ -500,6 +538,7 @@ var I18N = {
     payTo: 'Pay to', driver: 'Driver', merchant: 'Merchant', friend: 'Friend',
     payMethod: 'Choose payment method', m_jawwal: 'Jawwal Pay', m_palpay: 'PalPay', m_bop: 'Bank of Palestine', soon: 'Soon',
     simLbl: 'SIM your Jawwal Pay wallet is on', simHelp: 'Choose the SIM type your wallet is activated on. If your phone has two SIMs, make the call from that same SIM.', simJ: 'Jawwal SIM', simO: 'Ooredoo SIM', jawwal: 'Jawwal', ooredoo: 'Ooredoo',
+    pfLbl: 'When does your wallet ask for the PIN?', pfHelp: 'Dial *110# and check: if it asks for the PIN before the friend’s number, choose "First".', pfLast: 'Last (full code)', pfFirst: 'First (steps)', stTitle: 'After the call opens, enter in order:', st1: 'Your PIN (4 digits)', st2: 'Recipient number:', st3: 'Amount:', st4: 'Press 1 to confirm',
     lbl_driver: 'Driver’s phone number', lbl_merchant: 'Merchant’s phone number', lbl_friend: 'Friend’s phone number',
     amountLbl: 'Amount', amountShekel: 'Amount in shekels',
     merchantNote: 'Paying a merchant with Jawwal Pay asks for your PIN before the merchant number, so we can’t fill in the number and amount for you. After the call opens: enter your PIN, then the merchant number and amount.',
@@ -532,6 +571,9 @@ var I18N = {
 function tr(k) { return (I18N[lang] && I18N[lang][k]) || I18N.ar[k] || k; }
 function renderConfirm() {
   if (!last) return;
+  var showSteps = method === 'jawwal' && !last.merchant && isPF();
+  $('steps').hidden = !showSteps;
+  if (showSteps) { $('st-phone').textContent = last.p; $('st-amt').textContent = last.amt; }
   $('bigWarn').hidden = !(!last.merchant && parseFloat(last.amt) >= BIG);
   var simTxt = method === 'jawwal' ? ' (' + tr(sim === 'ooredoo' ? 'ooredoo' : 'jawwal') + ')' : '';
   if (last.merchant) {
