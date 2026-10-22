@@ -61,6 +61,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",system
 .favb[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:var(--on-yellow)}
 .rchip.fv{border-color:var(--yellow);direction:inherit}.rchip small{display:block;font-size:11px;font-weight:600;color:var(--muted);direction:ltr}
 .hshare{flex:none;width:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;cursor:pointer;display:grid;place-items:center;padding:0}
+.rhead{display:flex;align-items:center;justify-content:space-between}.rhead .rlbl{margin-bottom:6px}.rhead .link{margin-bottom:4px}
+.favrow{display:flex;align-items:center;gap:8px;width:100%;background:var(--surface);border:1.5px solid var(--yellow);border-radius:14px;padding:6px 10px;margin-bottom:6px}
+.favrow .nm{flex:1;min-width:0;font-weight:800;font-size:15px}.favrow .nm small{display:block;font-size:12px;font-weight:600;color:var(--muted);direction:ltr;text-align:start}
+.mv{flex:none;width:40px;height:40px;border:0;border-radius:12px;background:var(--track);color:var(--ink);font-size:18px;font-weight:800;cursor:pointer;display:grid;place-items:center;padding:0}
+.mv:disabled{opacity:.3;cursor:default}.mv.rm{color:#d93025}
+.rwrap{display:inline-flex;align-items:stretch;background:var(--surface);border:1.5px solid var(--line);border-radius:999px;overflow:hidden}
+.rwrap .rchip{border:0;border-radius:0;background:transparent;padding:8px 6px 8px 14px}
+.rwrap .rx{flex:none;width:38px;border:0;border-inline-start:1px solid var(--line);background:transparent;color:var(--muted);font-size:16px;cursor:pointer;padding:0}
 .hrow{display:flex;align-items:stretch;gap:8px;margin-bottom:8px}.hrow .hitem{margin-bottom:0;flex:1;min-width:0}
 .hdel{flex:none;min-width:48px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:14px;cursor:pointer;display:grid;place-items:center;font:inherit;font-weight:800;font-size:12px;padding:0 8px}
 .hdel.arm{background:#d93025;border-color:#d93025;color:#fff}
@@ -305,7 +313,7 @@ input:focus,input:focus-visible{outline:none}
 
       <div id="fields">
         <label class="lbl stp" for="phone" id="phoneLbl">رقم جوال السائق</label>
-        <div class="recent" id="favsBox" hidden><span class="rlbl" data-i18n="favLbl">المفضلة</span><div class="rchips" id="favChips"></div></div>
+        <div class="recent" id="favsBox" hidden><div class="rhead"><span class="rlbl" data-i18n="favLbl">المفضلة</span><button class="link" id="favEdit" type="button" data-i18n="favEdit" hidden>ترتيب</button></div><div class="rchips" id="favChips"></div></div>
         <div class="recent" id="recent" hidden><span class="rlbl" data-i18n="recentLbl">آخر الأرقام</span><div class="rchips" id="rchips"></div></div>
         <div class="field">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
@@ -552,6 +560,14 @@ if ('contacts' in navigator && window.ContactsManager) {
 function getBook() { try { var o = JSON.parse(load('book') || '{}'); return (o && typeof o === 'object' && !Array.isArray(o)) ? o : {}; } catch (e) { return {}; } }
 function saveBook(o) { store('book', JSON.stringify(o)); }
 function nameOf(p) { var b = getBook()[p]; return b && b.n ? b.n : ''; }
+function favList(o) {
+  var a = []; for (var k in o) if (o[k] && o[k].f) a.push(k);
+  a.sort(function (x, y) { var ox = o[x].o == null ? 999 : o[x].o, oy = o[y].o == null ? 999 : o[y].o; return ox - oy; });
+  return a;
+}
+function normFav(o) { favList(o).forEach(function (k, i) { o[k].o = i; }); }
+var favEditing = false;
+function rhide() { try { var a = JSON.parse(load('rhide') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
 function favCount(o) { var c = 0; for (var k in o) if (o[k] && o[k].f) c++; return c; }
 function toast(msg, ms) { $('toast').textContent = msg; $('toast').hidden = false; setTimeout(function () { $('toast').hidden = true; }, ms || 3000); }
 function syncName() {
@@ -562,8 +578,9 @@ function syncName() {
 function saveName(p) {
   var n = $('pname').value.trim(), o = getBook(), cur = o[p] || {};
   if (!n && !cur.n && !cur.f) return;
-  o[p] = { n: n || cur.n || '', f: cur.f ? 1 : 0 };
+  cur.n = n || cur.n || ''; cur.f = cur.f ? 1 : 0; o[p] = cur;
   saveBook(o);
+  var h = rhide(), i = h.indexOf(p); if (i > -1) { h.splice(i, 1); store('rhide', JSON.stringify(h)); }
 }
 $('pname').addEventListener('input', function () { var d = cleanPhone($('phone').value); this.dataset.for = /^(059|056)\d{7}$/.test(d) ? d : ''; clr(); });
 $('phone').addEventListener('input', function () {
@@ -578,8 +595,9 @@ $('fav').addEventListener('click', function () {
   var o = getBook(), cur = o[d] || { n: '', f: 0 };
   if (!cur.f && favCount(o) >= 5) { toast(tr('favMax'), 3500); return; }
   cur.f = cur.f ? 0 : 1; cur.n = $('pname').value.trim() || cur.n || '';
-  o[d] = cur; saveBook(o);
-  if (!cur.f && !cur.n) delete o[d], saveBook(o);
+  if (cur.f) cur.o = 999;
+  o[d] = cur; normFav(o); saveBook(o);
+  if (!cur.f && !cur.n) { delete o[d]; saveBook(o); }
   syncName(); renderRecent();
 });
 function chip(p, cls) {
@@ -590,21 +608,54 @@ function chip(p, cls) {
   b.addEventListener('click', function () { setPhone(p); $('pname').value = n; $('pname').dataset.for = n ? p : ''; clr(); syncName(); });
   return b;
 }
+function moveFav(p, dir) {
+  var o = getBook(), l = favList(o), i = l.indexOf(p), j = i + dir;
+  if (i < 0 || j < 0 || j >= l.length) return;
+  l[i] = l[j]; l[j] = p;
+  l.forEach(function (k, n) { o[k].o = n; });
+  saveBook(o); renderRecent();
+}
+function favRow(p, idx, total) {
+  var r = document.createElement('div'); r.className = 'favrow';
+  var nm = document.createElement('div'); nm.className = 'nm'; var n = nameOf(p);
+  nm.appendChild(document.createTextNode(n || fmt(p)));
+  if (n) { var sm = document.createElement('small'); sm.textContent = fmt(p); nm.appendChild(sm); }
+  function btn(txt, label, cls, fn, dis) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'mv' + (cls ? ' ' + cls : ''); b.textContent = txt;
+    b.setAttribute('aria-label', label); b.disabled = !!dis; b.addEventListener('click', fn); return b;
+  }
+  r.appendChild(nm);
+  r.appendChild(btn('\u25B2', tr('mvUp'), '', function () { moveFav(p, -1); }, idx === 0));
+  r.appendChild(btn('\u25BC', tr('mvDown'), '', function () { moveFav(p, 1); }, idx === total - 1));
+  r.appendChild(btn('\u2715', tr('favRemove'), 'rm', function () {
+    var o = getBook(); if (o[p]) { o[p].f = 0; if (!o[p].n) delete o[p]; normFav(o); saveBook(o); }
+    syncName(); renderRecent();
+  }));
+  return r;
+}
 function renderRecent() {
   var hide = (method === 'bop') || (method === 'jawwal' && to === 'merchant');
-  var o = getBook(), favs = [], seen = {}, list = [];
-  for (var k in o) if (o[k] && o[k].f) favs.push(k);
+  var o = getBook(), favs = favList(o), seen = {}, list = [], hid = rhide();
   favs.forEach(function (p) { seen[p] = 1; });
   getHist().forEach(function (h) {
-    if (h.merchant || !h.p || h.to !== to || seen[h.p] || list.length >= 3) return;
+    if (h.merchant || !h.p || h.to !== to || seen[h.p] || hid.indexOf(h.p) > -1 || list.length >= 3) return;
     seen[h.p] = 1; list.push(h.p);
   });
+  if (!favs.length) favEditing = false;
   $('favsBox').hidden = hide || !favs.length; $('favChips').innerHTML = '';
+  $('favEdit').hidden = favs.length < 1; $('favEdit').textContent = tr(favEditing ? 'favDone' : 'favEdit');
   $('recent').hidden = hide || !list.length; $('rchips').innerHTML = '';
   if (hide) return;
-  favs.forEach(function (p) { $('favChips').appendChild(chip(p, 'fv')); });
-  list.forEach(function (p) { $('rchips').appendChild(chip(p)); });
+  favs.forEach(function (p, i) { $('favChips').appendChild(favEditing ? favRow(p, i, favs.length) : chip(p, 'fv')); });
+  list.forEach(function (p) {
+    var w = document.createElement('span'); w.className = 'rwrap';
+    w.appendChild(chip(p));
+    var x = document.createElement('button'); x.type = 'button'; x.className = 'rx'; x.textContent = '\u2715'; x.setAttribute('aria-label', tr('rmRecent'));
+    x.addEventListener('click', function () { var h = rhide(); if (h.indexOf(p) < 0) h.push(p); store('rhide', JSON.stringify(h.slice(-60))); renderRecent(); });
+    w.appendChild(x); $('rchips').appendChild(w);
+  });
 }
+$('favEdit').addEventListener('click', function () { favEditing = !favEditing; renderRecent(); });
 
 function showConfirm() {
   store('method', method); store('sim', sim); store('to', to);
@@ -712,7 +763,7 @@ var I18N = {
     tabSend: 'تحويل', tabHist: 'تحويلاتي', histNote: 'هنا بتظهر التحويلات اللي فتحت اتصالها. بتنحفظ 30 يوم وبعدها بتنمسح تلقائياً. تأكد من رسالة الشركة إنه التحويل تم.', purged: 'تم مسح {n} تحويل أقدم من 30 يوم تلقائياً.', ok: 'تمام', histEmpty: 'لم يتم إجراء تحويلات. أول تحويل بتعمله رح يظهر هنا.',
     copyBtn: 'نسخ', copied: 'تم النسخ', copyManual: 'انسخه يدوي', iosNote: 'على الآيفون: انسخ الكود، وافتح تطبيق الهاتف، والصقه واتصل.',
     delTitle: 'مسح كل التحويلات؟', delText: 'رح تنمسح {n} تحويل مسجّل على هالجوال، وما بتقدر ترجعهم.', delYes: 'نعم، امسح', delNo: 'لا، رجوع', delDone: 'تم مسح التحويلات',
-    tagline: 'مساعد تحويل أموال', recentLbl: 'آخر الأرقام', nx1: 'اضغط "تأكيد واتصال"', nx2: 'اكتب رمزك السري بشاشة الشركة. التطبيق ما بيشوفو.', nx3: 'كمّل الخطوات وأكّد التحويل',  bopSub: 'بيفتح قائمة البنك', bopStep: 'بعد الاتصال', bopNote: 'بنك فلسطين بيطلب الرمز السري أول شي. بعد ما يفتح الاتصال اكتب رمزك بشاشة البنك وكمّل الخطوات بنفسك. التطبيق ما بيشوف رمزك.', bopAfter: 'اكتب رمزك السري وكمّل بشاشة البنك',   favLbl: 'المفضلة', namePh: 'الاسم (اختياري)', favAria: 'إضافة للمفضلة', favMax: 'أقصى عدد للمفضلة 5. شيل واحد أول.', favNeed: 'اكتب الرقم أول', shareAria: 'مشاركة', shTitle: 'تحويل عبر حوّل', shTo: 'المستلم', shNum: 'الرقم', shAmt: 'المبلغ', shVia: 'الوسيلة',  clearAll: 'مسح كل السجل', delOne: 'مسح', delSure: 'متأكد؟',  reportBtn: 'بلّغ عن مشكلة', reportMsg: 'انسخت معلومات المشكلة. الصقها بالرسالة عنّا',  contactPick: 'اختيار من جهات الاتصال', errPickNo: 'ما لقينا رقم جوال صالح (059 أو 056) لهاي الجهة', updMsg: 'في تحديث جديد للتطبيق', updBtn: 'تحديث', helpAbout: 'حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي أو بنك فلسطين، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.', disc: 'حوّل أداة مساعدة وليست جهة مالية. التحويل يتم من خلال جوال باي أو بال باي أو بنك فلسطين.',
+    tagline: 'مساعد تحويل أموال', recentLbl: 'آخر الأرقام', favEdit: 'ترتيب', favDone: 'تم', mvUp: 'تحريك للأعلى', mvDown: 'تحريك للأسفل', favRemove: 'إزالة من المفضلة', rmRecent: 'مسح الرقم من القائمة',  nx1: 'اضغط "تأكيد واتصال"', nx2: 'اكتب رمزك السري بشاشة الشركة. التطبيق ما بيشوفو.', nx3: 'كمّل الخطوات وأكّد التحويل',  bopSub: 'بيفتح قائمة البنك', bopStep: 'بعد الاتصال', bopNote: 'بنك فلسطين بيطلب الرمز السري أول شي. بعد ما يفتح الاتصال اكتب رمزك بشاشة البنك وكمّل الخطوات بنفسك. التطبيق ما بيشوف رمزك.', bopAfter: 'اكتب رمزك السري وكمّل بشاشة البنك',   favLbl: 'المفضلة', namePh: 'الاسم (اختياري)', favAria: 'إضافة للمفضلة', favMax: 'أقصى عدد للمفضلة 5. شيل واحد أول.', favNeed: 'اكتب الرقم أول', shareAria: 'مشاركة', shTitle: 'تحويل عبر حوّل', shTo: 'المستلم', shNum: 'الرقم', shAmt: 'المبلغ', shVia: 'الوسيلة',  clearAll: 'مسح كل السجل', delOne: 'مسح', delSure: 'متأكد؟',  reportBtn: 'بلّغ عن مشكلة', reportMsg: 'انسخت معلومات المشكلة. الصقها بالرسالة عنّا',  contactPick: 'اختيار من جهات الاتصال', errPickNo: 'ما لقينا رقم جوال صالح (059 أو 056) لهاي الجهة', updMsg: 'في تحديث جديد للتطبيق', updBtn: 'تحديث', helpAbout: 'حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي أو بنك فلسطين، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.', disc: 'حوّل أداة مساعدة وليست جهة مالية. التحويل يتم من خلال جوال باي أو بال باي أو بنك فلسطين.',
     credit: 'تم التطوير من', creditSfx: 'للخدمات الرقمية', shekel: 'شيكل', payMerchant: 'دفع لتاجر', afterPin: 'بعد الرمز السري'
   },
   en: {
@@ -747,7 +798,7 @@ var I18N = {
     tabSend: 'Send', tabHist: 'My transfers', histNote: 'Transfers whose call you opened show up here. They are kept for 30 days, then deleted automatically. Check the provider’s message to confirm it went through.', purged: '{n} transfer(s) older than 30 days were deleted automatically.', ok: 'OK', histEmpty: 'No transfers yet. Your first transfer will show up here.',
     copyBtn: 'Copy', copied: 'Copied', copyManual: 'Copy it manually', iosNote: 'On iPhone: copy the code, open the Phone app, paste it and call.',
     delTitle: 'Delete all transfers?', delText: '{n} transfer(s) saved on this phone will be deleted. This can’t be undone.', delYes: 'Yes, delete', delNo: 'No, go back', delDone: 'Transfers deleted',
-    tagline: 'Money transfer assistant', recentLbl: 'Recent numbers', nx1: 'Tap “Confirm and call”', nx2: 'Enter your PIN on the provider’s screen. The app never sees it.', nx3: 'Follow the steps and confirm the transfer',  bopSub: 'Opens the bank menu', bopStep: 'After the call', bopNote: 'Bank of Palestine asks for your PIN first. After the call opens, enter your PIN on the bank screen and continue the steps yourself. The app never sees your PIN.', bopAfter: 'Enter your PIN and continue on the bank screen',   favLbl: 'Favorites', namePh: 'Name (optional)', favAria: 'Add to favorites', favMax: 'Max 5 favorites. Remove one first.', favNeed: 'Enter the number first', shareAria: 'Share', shTitle: 'Transfer via Hawwil', shTo: 'To', shNum: 'Number', shAmt: 'Amount', shVia: 'Method',  clearAll: 'Clear all history', delOne: 'Delete', delSure: 'Sure?',  reportBtn: 'Report a problem', reportMsg: 'Problem details copied. Paste them in the message to us',  contactPick: 'Pick from contacts', errPickNo: 'No valid mobile number (059 or 056) found for this contact', updMsg: 'A new version is available', updBtn: 'Update', helpAbout: 'Hawwil is a money transfer assistant: it prepares the transfer code and opens the dialer. The transfer itself is made through Jawwal Pay, PalPay or Bank of Palestine. The app never moves money or stores any PIN.', disc: 'Hawwil is a helper tool, not a financial institution. Transfers are made through Jawwal Pay, PalPay or Bank of Palestine.',
+    tagline: 'Money transfer assistant', recentLbl: 'Recent numbers', favEdit: 'Reorder', favDone: 'Done', mvUp: 'Move up', mvDown: 'Move down', favRemove: 'Remove from favorites', rmRecent: 'Remove number from list',  nx1: 'Tap “Confirm and call”', nx2: 'Enter your PIN on the provider’s screen. The app never sees it.', nx3: 'Follow the steps and confirm the transfer',  bopSub: 'Opens the bank menu', bopStep: 'After the call', bopNote: 'Bank of Palestine asks for your PIN first. After the call opens, enter your PIN on the bank screen and continue the steps yourself. The app never sees your PIN.', bopAfter: 'Enter your PIN and continue on the bank screen',   favLbl: 'Favorites', namePh: 'Name (optional)', favAria: 'Add to favorites', favMax: 'Max 5 favorites. Remove one first.', favNeed: 'Enter the number first', shareAria: 'Share', shTitle: 'Transfer via Hawwil', shTo: 'To', shNum: 'Number', shAmt: 'Amount', shVia: 'Method',  clearAll: 'Clear all history', delOne: 'Delete', delSure: 'Sure?',  reportBtn: 'Report a problem', reportMsg: 'Problem details copied. Paste them in the message to us',  contactPick: 'Pick from contacts', errPickNo: 'No valid mobile number (059 or 056) found for this contact', updMsg: 'A new version is available', updBtn: 'Update', helpAbout: 'Hawwil is a money transfer assistant: it prepares the transfer code and opens the dialer. The transfer itself is made through Jawwal Pay, PalPay or Bank of Palestine. The app never moves money or stores any PIN.', disc: 'Hawwil is a helper tool, not a financial institution. Transfers are made through Jawwal Pay, PalPay or Bank of Palestine.',
     credit: 'Developed by', creditSfx: 'Digital Services', shekel: '₪', payMerchant: 'Pay a merchant', afterPin: 'After your PIN'
   }
 };
@@ -947,7 +998,7 @@ function useHist(h) {
 $('dial').addEventListener('click', function () {
   if (!last) return;
   if (last.merchant) { pushHist({ m: method, s: sim, to: 'merchant', merchant: true, t: Date.now() }); }
-  else { pushHist({ m: method, s: sim, to: to, p: last.p, a: last.amt, t: Date.now() }); saveName(last.p); }
+  else { pushHist({ m: method, s: sim, to: to, p: last.p, a: last.amt, t: Date.now() }); saveName(last.p); var hh = rhide(), ii = hh.indexOf(last.p); if (ii > -1) { hh.splice(ii, 1); store('rhide', JSON.stringify(hh)); } }
   track('transfer-' + method + (last.merchant ? '-merchant' : ''));
 });
 document.querySelectorAll('#tabs button').forEach(function (b) {
