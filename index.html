@@ -123,7 +123,7 @@ details p{margin:0 0 12px;color:var(--muted);font-size:14px}
 .qa{direction:ltr;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:10px}
 .qa button{background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:12px;min-height:44px;font-family:"Cairo",sans-serif;font-weight:800;font-size:16px;cursor:pointer;padding:0}
 .qa button[aria-pressed="true"]{background:var(--yellow);color:var(--on-yellow);border-color:var(--yellow)}
-.upd{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:start}
+.upd{top:calc(10px + env(safe-area-inset-top,0px));bottom:auto;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:start}
 .upd[hidden]{display:none}
 .upd button{flex:none;background:var(--yellow);color:var(--on-yellow);border:0;border-radius:10px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer}
 .pfbox{margin-top:16px}

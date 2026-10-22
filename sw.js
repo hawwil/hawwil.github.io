@@ -1,5 +1,5 @@
 // حوّل - تشغيل بدون إنترنت. غيّر رقم النسخة عند كل تحديث.
-var V = 'hawwil-v6';
+var V = 'hawwil-v7';
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-v3-192.png', 'icon-v3-512.png', 'apple-touch-icon-v3.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(V).then(function (c) {
