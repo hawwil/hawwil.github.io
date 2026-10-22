@@ -360,7 +360,7 @@ input:focus,input:focus-visible{outline:none}
 
     <section id="histPanel" class="panel">
       <div class="hist-head"><h2 class="help-title" data-i18n="tabHist">تحويلاتي</h2><button class="clrall" id="histClear" type="button" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></svg><span data-i18n="clearAll">مسح كل السجل</span></button></div>
-      <p class="note" data-i18n="histNote" style="text-align:start;margin:6px 0 14px">هون بتظهر التحويلات اللي فتحت اتصالها. تأكد من رسالة الشركة إنه التحويل تم.</p>
+      <p class="note" data-i18n="histNote" style="text-align:start;margin:6px 0 14px">هنا بتظهر التحويلات اللي فتحت اتصالها. تأكد من رسالة الشركة إنه التحويل تم.</p>
       <div class="banner" id="purgeBanner" hidden><span id="purgeText"></span><button class="link" id="purgeOk" type="button" data-i18n="ok">تمام</button></div>
       <div class="filters" id="filters">
         <button class="chip" type="button" data-f="all" aria-pressed="true" data-i18n="fAll">الكل</button>
@@ -377,7 +377,7 @@ input:focus,input:focus-visible{outline:none}
       </div>
       <p class="sumskip" id="sumSkip" hidden></p>
       <div id="histList"></div>
-      <p class="empty" id="histEmpty" data-i18n="histEmpty" hidden>ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هون.</p>
+      <p class="empty" id="histEmpty" data-i18n="histEmpty" hidden>ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هنا.</p>
     </section>
 
     <section id="help" class="panel">
@@ -439,7 +439,7 @@ input:focus,input:focus-visible{outline:none}
 <div class="toast upd" id="upd" hidden><span data-i18n="updMsg">في تحديث جديد</span><button id="updBtn" type="button" data-i18n="updBtn">تحديث</button></div>
 
 <script>
-// ===== الكودات: عدّل هون لو تغيّر أي كود =====
+// ===== الكودات: عدّل هنا لو تغيّر أي كود =====
 var METHODS = {
   jawwal: { name: 'جوال باي', build: function (sim, p, a, pinFirst) { var pre = '*' + (sim === 'ooredoo' ? '268' : '110') + '*1'; return pinFirst ? pre + '#' : pre + '*' + p + '*' + a + '#'; } },
   bop: { name: 'بنك فلسطين', build: function () { return '*267#'; } },
@@ -709,7 +709,7 @@ var I18N = {
     q5: 'وين بتنحفظ التحويلات الأخيرة؟', a5: 'على جوالك بس، وبتقدر تمسحها بأي وقت من زر "مسح".',
     contact: 'تابعنا على إنستغرام', replay: 'شاهد الشرح مرة ثانية',
     fAll: 'الكل', fToday: 'اليوم', fRange: 'فترة محددة', fFrom: 'من', fTo: 'إلى', pf: 'من', pt: 'إلى', pu: 'حتى', sumAll: 'كل التحويلات', sumToday: 'تحويلات اليوم', sumSkip: 'مش محسوب: {n} دفع لتاجر بجوال باي (المبلغ بتكتبه بشاشة الشركة).', histNone: 'ما في تحويلات بهالفترة.', sumTotal: 'المجموع', oneT: 'تحويل', manyT: 'تحويلات',
-    tabSend: 'تحويل', tabHist: 'تحويلاتي', histNote: 'هون بتظهر التحويلات اللي فتحت اتصالها. بتنحفظ 30 يوم وبعدها بتنمسح تلقائياً. تأكد من رسالة الشركة إنه التحويل تم.', purged: 'تم مسح {n} تحويل أقدم من 30 يوم تلقائياً.', ok: 'تمام', histEmpty: 'ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هون.',
+    tabSend: 'تحويل', tabHist: 'تحويلاتي', histNote: 'هنا بتظهر التحويلات اللي فتحت اتصالها. بتنحفظ 30 يوم وبعدها بتنمسح تلقائياً. تأكد من رسالة الشركة إنه التحويل تم.', purged: 'تم مسح {n} تحويل أقدم من 30 يوم تلقائياً.', ok: 'تمام', histEmpty: 'ما في تحويلات لسا. أول تحويل بتعمله رح يظهر هنا.',
     copyBtn: 'نسخ', copied: 'تم النسخ', copyManual: 'انسخه يدوي', iosNote: 'على الآيفون: انسخ الكود، وافتح تطبيق الهاتف، والصقه واتصل.',
     delTitle: 'مسح كل التحويلات؟', delText: 'رح تنمسح {n} تحويل مسجّل على هالجوال، وما بتقدر ترجعهم.', delYes: 'نعم، امسح', delNo: 'لا، رجوع', delDone: 'تم مسح التحويلات',
     tagline: 'مساعد تحويل أموال', recentLbl: 'آخر الأرقام', nx1: 'اضغط "تأكيد واتصال"', nx2: 'اكتب رمزك السري بشاشة الشركة. التطبيق ما بيشوفو.', nx3: 'كمّل الخطوات وأكّد التحويل',  bopSub: 'بيفتح قائمة البنك', bopStep: 'بعد الاتصال', bopNote: 'بنك فلسطين بيطلب الرمز السري أول شي. بعد ما يفتح الاتصال اكتب رمزك بشاشة البنك وكمّل الخطوات بنفسك. التطبيق ما بيشوف رمزك.', bopAfter: 'اكتب رمزك السري وكمّل بشاشة البنك',   favLbl: 'المفضلة', namePh: 'الاسم (اختياري)', favAria: 'إضافة للمفضلة', favMax: 'أقصى عدد للمفضلة 5. شيل واحد أول.', favNeed: 'اكتب الرقم أول', shareAria: 'مشاركة', shTitle: 'تحويل عبر حوّل', shTo: 'المستلم', shNum: 'الرقم', shAmt: 'المبلغ', shVia: 'الوسيلة',  clearAll: 'مسح كل السجل', delOne: 'مسح', delSure: 'متأكد؟',  reportBtn: 'بلّغ عن مشكلة', reportMsg: 'انسخت معلومات المشكلة. الصقها بالرسالة عنّا',  contactPick: 'اختيار من جهات الاتصال', errPickNo: 'ما لقينا رقم جوال صالح (059 أو 056) لهاي الجهة', updMsg: 'في تحديث جديد للتطبيق', updBtn: 'تحديث', helpAbout: 'حوّل مساعد تحويل أموال: بيجهّز كود التحويل ويفتح الاتصال. التحويل نفسه بيتم عبر جوال باي أو بال باي، والتطبيق ما بيحرّك مصاري ولا بيخزّن أي رمز سري.', disc: 'حوّل أداة مساعدة وليست جهة مالية. التحويل بيتم عبر جوال باي أو بال باي.',
