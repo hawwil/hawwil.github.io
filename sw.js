@@ -1,5 +1,5 @@
 // حوّل - تشغيل بدون إنترنت. غيّر رقم النسخة بالسطر الجاي عند كل تحديث (1.2 ثم 1.3 ...).
-var V = 'hawwil-1.19';
+var V = 'hawwil-1.20';
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-v3-192.png', 'icon-v3-512.png', 'apple-touch-icon-v3.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(V).then(function (c) {
@@ -8,7 +8,7 @@ self.addEventListener('install', function (e) {
 });
 self.addEventListener('activate', function (e) {
   e.waitUntil(caches.keys().then(function (ks) {
-    var old = ks.filter(function (k) { return k !== V; });
+    var old = ks.filter(function (k) { return k !== V && k.indexOf('hawwil-') === 0; });
     return Promise.all(old.map(function (k) { return caches.delete(k); })).then(function () {
       return self.clients.claim();
     }).then(function () {
