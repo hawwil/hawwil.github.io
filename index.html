@@ -1182,7 +1182,7 @@ function track(name) { var q = evq(); q.push(name); store('evq', JSON.stringify(
   navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadCtl) $('upd').hidden = false; hadCtl = true; });
   function info() {
     if (!window.caches) return;
-    caches.keys().then(function (k) { var m = (k[0] || '').match(/-(\d+(?:\.\d+)+)$/); if (m) si.textContent = 'v' + m[1]; });
+    caches.keys().then(function (k) { var mine = k.filter(function (x) { return x.indexOf('hawwil-') === 0; }); var m = (mine[0] || '').match(/-(\d+(?:\.\d+)+)$/); if (m) si.textContent = 'v' + m[1]; });
   }
   navigator.serviceWorker.register('sw.js').then(function (reg) {
     setTimeout(info, 1500);
