@@ -206,7 +206,7 @@ main{flex:1;padding:4px 16px 0}
 
 /* Segmented */
 .pick,.seg,.seg2{display:grid;background:var(--track);border-radius:14px;padding:4px;gap:4px}
-.pick{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pick{grid-template-columns:repeat(2,minmax(0,1fr))}
 .seg,.seg2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .pick button,.seg button,.seg2 button{background:transparent;color:var(--muted);border:0;border-radius:10px;padding:10px 6px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;min-height:44px}
 .pick button[aria-pressed="true"],.seg button[aria-pressed="true"],.seg2 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
@@ -324,9 +324,8 @@ input:focus,input:focus-visible{outline:none}
       <div class="qbox" id="qbox" hidden><button class="qtog" id="qTog" type="button" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="#c98f00" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span class="qtl" data-i18n="qTitle">تحويلاتي السريعة</span><span class="qcnt" id="qCnt"></span><svg class="qchev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="qpanel" id="qpanel" hidden><div class="qlist" id="qlist"></div><div class="favfoot"><button class="link" id="qEdit" type="button" data-i18n="qEditBtn">ترتيب/حذف</button></div></div></div>
       <span class="lbl stp" id="payToLbl" data-i18n="payTo">بدك تدفع إلى</span>
       <div class="pick" id="pick">
-        <button type="button" data-to="driver" data-i18n="driver" aria-pressed="true">سائق</button>
+        <button type="button" data-to="driver" data-i18n="driverFriend" aria-pressed="true">سائق / صديق</button>
         <button type="button" data-to="merchant" data-i18n="merchant" aria-pressed="false">تاجر</button>
-        <button type="button" data-to="friend" data-i18n="friend" aria-pressed="false">صديق</button>
       </div>
 
       <span class="lbl stp" data-i18n="payMethod">اختار وسيلة الدفع</span>
@@ -1785,9 +1784,9 @@ function paint() {
     b.setAttribute('aria-pressed', (b.dataset.pf === '1') === isPF() ? 'true' : 'false');
   });
   document.querySelectorAll('#pick button').forEach(function (b) {
-    b.setAttribute('aria-pressed', b.dataset.to === to ? 'true' : 'false');
+    b.setAttribute('aria-pressed', (b.dataset.to === to || (b.dataset.to === 'driver' && to === 'friend')) ? 'true' : 'false');
   });
-  $('phoneLbl').textContent = tr('lbl_' + to);
+  $('phoneLbl').textContent = tr(to === 'merchant' ? 'lbl_merchant' : 'lbl_person');
   var isBop = method === 'bop';
   var onlyDial = isBop || (method === 'jawwal' && to === 'merchant');
   $('pick').style.display = isBop ? 'none' : ''; $('payToLbl').style.display = isBop ? 'none' : '';
@@ -2143,7 +2142,7 @@ var I18N = {
     payMethod: 'اختار وسيلة الدفع', m_jawwal: 'جوال باي', m_palpay: 'بال باي', m_bop: 'بنك فلسطين', soon: 'قريباً',
     simLbl: 'الشريحة المفعّل عليها محفظة جوال باي', simHelp: 'اختار نوع الشريحة اللي مفعّلة عليها المحفظة. لو جوالك فيه شريحتين، اتصل من نفس الشريحة.', simJ: 'شريحة جوال', simO: 'شريحة أوريدو', jawwal: 'جوال', ooredoo: 'أوريدو',
     pfLbl: 'متى بتطلب المحفظة الرمز السري؟', pfHelp: 'اتصل بـ*110# وشوف: لو طلبت الرمز السري قبل رقم الصديق اختار "أول".', pfLast: 'بالآخر (كود كامل)', pfFirst: 'أول (خطوات)', stTitle: 'بعد ما يفتح الاتصال، اكتب بالترتيب:', st1: 'الرمز السري (4 أرقام)', st2: 'رقم المستلم:', st3: 'المبلغ:', st4: 'اضغط 1 للتأكيد',
-    lbl_driver: 'رقم جوال السائق', lbl_merchant: 'رقم جوال التاجر', lbl_friend: 'رقم جوال الصديق',
+    lbl_person: 'رقم الجوال', driverFriend: 'سائق / صديق', lbl_driver: 'رقم جوال السائق', lbl_merchant: 'رقم جوال التاجر', lbl_friend: 'رقم جوال الصديق',
     amountLbl: 'المبلغ', amountShekel: 'المبلغ بالشيكل',
     merchantNote: 'الدفع لتاجر بجوال باي بيطلب الرمز السري قبل رقم التاجر، فما بنقدر نكتب الرقم والمبلغ مسبقاً. بعد ما يفتح الاتصال: اكتب رمزك السري، وبعدين رقم التاجر والمبلغ.',
     sending: 'بدك تحوّل', via: 'عن طريق', toNumber: 'إلى الرقم',
@@ -2179,7 +2178,7 @@ var I18N = {
     payMethod: 'Choose payment method', m_jawwal: 'Jawwal Pay', m_palpay: 'PalPay', m_bop: 'Bank of Palestine', soon: 'Soon',
     simLbl: 'SIM your Jawwal Pay wallet is on', simHelp: 'Choose the SIM type your wallet is activated on. If your phone has two SIMs, make the call from that same SIM.', simJ: 'Jawwal SIM', simO: 'Ooredoo SIM', jawwal: 'Jawwal', ooredoo: 'Ooredoo',
     pfLbl: 'When does your wallet ask for the PIN?', pfHelp: 'Dial *110# and check: if it asks for the PIN before the friend’s number, choose "First".', pfLast: 'Last (full code)', pfFirst: 'First (steps)', stTitle: 'After the call opens, enter in order:', st1: 'Your PIN (4 digits)', st2: 'Recipient number:', st3: 'Amount:', st4: 'Press 1 to confirm',
-    lbl_driver: 'Driver’s phone number', lbl_merchant: 'Merchant’s phone number', lbl_friend: 'Friend’s phone number',
+    lbl_person: 'Phone number', driverFriend: 'Driver / Friend', lbl_driver: 'Driver’s phone number', lbl_merchant: 'Merchant’s phone number', lbl_friend: 'Friend’s phone number',
     amountLbl: 'Amount', amountShekel: 'Amount in shekels',
     merchantNote: 'Paying a merchant with Jawwal Pay asks for your PIN before the merchant number, so we can’t fill in the number and amount for you. After the call opens: enter your PIN, then the merchant number and amount.',
     sending: 'You are sending', via: 'Via', toNumber: 'To number',
