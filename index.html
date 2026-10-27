@@ -157,6 +157,8 @@ details p{margin:0 0 12px;color:var(--muted);font-size:14px}
 .qrc canvas{display:block;margin:8px auto;width:min(70vw,260px);height:auto;border-radius:12px;background:#fff}
 .qrc .field input{font-size:17px}.qrc .seg3{margin:0 0 10px}.qrc label.l{display:block;text-align:start;font-size:13px;font-weight:700;color:var(--muted);margin:10px 0 6px}
 .qrc .nm{width:100%;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:12px 14px;font-family:inherit;font-weight:700;font-size:17px;min-height:48px}
+.relrow{margin:8px 0 0}#prel{width:100%;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:11px 14px;font:inherit;font-weight:600;font-size:15px;min-height:46px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a97a8' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 14px center}
+#prel[data-empty="1"]{color:var(--muted)}
 .recent{margin:0 0 10px}.rlbl{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:0 2px 6px}
 .rchips{display:flex;flex-wrap:wrap;gap:8px}
 .rchip{background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;font-family:"Cairo",sans-serif;font-weight:700;font-size:14px;cursor:pointer;direction:ltr;min-height:38px}
@@ -355,6 +357,7 @@ input:focus,input:focus-visible{outline:none}
           <input id="phone" type="tel" inputmode="numeric" maxlength="24" placeholder="05X XXX XXXX" autocomplete="off"><button class="cpick" id="cpick" type="button" hidden data-i18n-aria="contactPick" aria-label="اختيار من جهات الاتصال"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></button>
         </div>
         <div class="nrow"><input id="pname" type="text" maxlength="24" autocomplete="off" data-i18n-ph="namePh" placeholder="الاسم (اختياري)"><button class="favb" id="fav" type="button" aria-pressed="false" data-i18n-aria="favAria" aria-label="إضافة للمفضلة"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg></button></div>
+        <div class="relrow"><select id="prel" aria-label="العلاقة" data-i18n-aria="relAria"><option value="" data-i18n="relNone">العلاقة (اختياري)</option><option value="friend" data-i18n="rel_friend">friend</option><option value="wife" data-i18n="rel_wife">wife</option><option value="husband" data-i18n="rel_husband">husband</option><option value="mother" data-i18n="rel_mother">mother</option><option value="father" data-i18n="rel_father">father</option><option value="brother" data-i18n="rel_brother">brother</option><option value="sister" data-i18n="rel_sister">sister</option><option value="son" data-i18n="rel_son">son</option><option value="daughter" data-i18n="rel_daughter">daughter</option><option value="relative" data-i18n="rel_relative">relative</option><option value="seller" data-i18n="rel_seller">seller</option></select></div>
         <p class="err" id="e-phone"></p>
 
         <span class="lbl stp" data-i18n="amountLbl">المبلغ</span>
@@ -1877,6 +1880,7 @@ if ('contacts' in navigator && window.ContactsManager) {
 // دفتر الأسماء والمفضلة (محفوظ على الجوال بس)
 function getBook() { try { var o = JSON.parse(load('book') || '{}'); return (o && typeof o === 'object' && !Array.isArray(o)) ? o : {}; } catch (e) { return {}; } }
 function saveBook(o) { store('book', JSON.stringify(o)); }
+function relOf(p) { var b = getBook()[p]; return b && b.r && I18N.ar['rel_' + b.r] ? b.r : ''; }
 function nameOf(p) { var b = getBook()[p]; return b && b.n ? b.n : ''; }
 function favList(o) {
   var a = []; for (var k in o) if (o[k] && o[k].f) a.push(k);
@@ -1892,14 +1896,23 @@ function syncName() {
   var d = cleanPhone($('phone').value), ok = /^(059|056)\d{7}$/.test(d), b = ok ? getBook()[d] : null;
   if (ok && b && b.n && !$('pname').value) { $('pname').value = b.n; $('pname').dataset.for = d; }
   $('fav').setAttribute('aria-pressed', b && b.f ? 'true' : 'false');
+  if (ok) { if (b) $('prel').value = b.r || ''; else if ($('prel').dataset.for !== d) $('prel').value = ''; $('prel').dataset.for = d; }
+  else if (!cleanPhone($('phone').value)) { $('prel').value = ''; $('prel').dataset.for = ''; }
+  $('prel').dataset.empty = $('prel').value ? '' : '1';
 }
 function saveName(p) {
   var n = $('pname').value.trim(), o = getBook(), cur = o[p] || {};
-  if (!n && !cur.n && !cur.f) return;
-  cur.n = n || cur.n || ''; cur.f = cur.f ? 1 : 0; o[p] = cur;
+  var r = $('prel').value;
+  if (!n && !cur.n && !cur.f && !r) return;
+  cur.n = n || cur.n || ''; cur.f = cur.f ? 1 : 0; if (r) cur.r = r; else delete cur.r; o[p] = cur;
   saveBook(o);
   var h = rhide(), i = h.indexOf(p); if (i > -1) { h.splice(i, 1); store('rhide', JSON.stringify(h)); }
 }
+$('prel').addEventListener('change', function () {
+  this.dataset.empty = this.value ? '' : '1';
+  var d = cleanPhone($('phone').value); if (!/^(059|056)\d{7}$/.test(d)) return;
+  var o = getBook(); if (o[d]) { if (this.value) o[d].r = this.value; else delete o[d].r; saveBook(o); renderRecent(); }
+});
 $('pname').addEventListener('input', function () { var d = cleanPhone($('phone').value); this.dataset.for = /^(059|056)\d{7}$/.test(d) ? d : ''; clr(); });
 $('phone').addEventListener('input', function () {
   var d = cleanPhone($('phone').value), ok = /^(059|056)\d{7}$/.test(d), f = $('pname').dataset.for || '';
@@ -1912,10 +1925,10 @@ $('fav').addEventListener('click', function () {
   if (!/^(059|056)\d{7}$/.test(d)) { toast(tr('favNeed')); return; }
   var o = getBook(), cur = o[d] || { n: '', f: 0 };
   if (!cur.f && favCount(o) >= 5) { toast(tr('favMax'), 3500); return; }
-  cur.f = cur.f ? 0 : 1; cur.n = $('pname').value.trim() || cur.n || '';
+  cur.f = cur.f ? 0 : 1; cur.n = $('pname').value.trim() || cur.n || ''; if ($('prel').value) cur.r = $('prel').value; else delete cur.r;
   if (cur.f) cur.o = 999;
   o[d] = cur; normFav(o); saveBook(o);
-  if (!cur.f && !cur.n) { delete o[d]; saveBook(o); }
+  if (!cur.f && !cur.n && !cur.r) { delete o[d]; saveBook(o); }
   syncName(); renderRecent();
 });
 function chip(p, cls) {
@@ -1938,7 +1951,7 @@ function favItem(p) {
   var n = nameOf(p), b = document.createElement('button'); b.type = 'button'; b.className = 'favitem';
   b.innerHTML = '<span class="av"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6" fill="#c98f00"/><path d="M4.8 20c.6-4 3.5-6 7.2-6s6.6 2 7.2 6z" fill="#c98f00"/></svg></span>';
   var nm = document.createElement('span'); nm.className = 'nm'; nm.appendChild(document.createTextNode(n || fmt(p)));
-  if (n) { var sm = document.createElement('small'); sm.textContent = fmt(p); nm.appendChild(sm); }
+  if (n || relOf(p)) { var sm = document.createElement('small'); sm.textContent = fmt(p) + (relOf(p) ? ' · ' + tr('rel_' + relOf(p)) : ''); nm.appendChild(sm); }
   b.appendChild(nm);
   b.addEventListener('click', function () {
     setPhone(p); $('pname').value = n; $('pname').dataset.for = n ? p : ''; clr(); syncName();
@@ -1957,7 +1970,7 @@ function favRow(p, idx, total) {
   var r = document.createElement('div'); r.className = 'favrow';
   var nm = document.createElement('div'); nm.className = 'nm'; var n = nameOf(p);
   nm.appendChild(document.createTextNode(n || fmt(p)));
-  if (n) { var sm = document.createElement('small'); sm.textContent = fmt(p); nm.appendChild(sm); }
+  if (n || relOf(p)) { var sm = document.createElement('small'); sm.textContent = fmt(p) + (relOf(p) ? ' · ' + tr('rel_' + relOf(p)) : ''); nm.appendChild(sm); }
   function btn(txt, label, cls, fn, dis) {
     var b = document.createElement('button'); b.type = 'button'; b.className = 'mv' + (cls ? ' ' + cls : ''); b.textContent = txt;
     b.setAttribute('aria-label', label); b.disabled = !!dis; b.addEventListener('click', fn); return b;
@@ -2136,6 +2149,7 @@ $('back').addEventListener('click', function () {
 
 var I18N = {
   ar: {
+    relNone: 'العلاقة (اختياري)', relAria: 'العلاقة', rel_friend: 'صديق', rel_wife: 'زوجة', rel_husband: 'زوج', rel_mother: 'أم', rel_father: 'أب', rel_brother: 'أخ', rel_sister: 'أخت', rel_son: 'ابن', rel_daughter: 'بنت', rel_relative: 'قريب', rel_seller: 'بائع',
     qrShare: 'شارك حوّل', qrShareSub: 'رمز QR للتطبيق', qrHelp: 'خلّي صاحبك يمسح الرمز بكاميرا جواله ويثبّت التطبيق.', qrSave: 'حفظ / مشاركة الصورة', qrCardT: 'ثبّت حوّل', qrCardS: 'مساعد تحويل أموال · ببلاش', qrScan: 'امسح الرمز بكاميرا جوالك',
     brand: 'حوّل', themeAria: 'تبديل العرض نهاري أو ليلي', offline: 'بدون إنترنت',
     payTo: 'بدك تدفع إلى', driver: 'سائق', merchant: 'تاجر', friend: 'صديق',
@@ -2172,6 +2186,7 @@ var I18N = {
     credit: 'تم التطوير من', creditSfx: 'للخدمات الرقمية', shekel: 'شيكل', payMerchant: 'دفع لتاجر', afterPin: 'بعد الرمز السري'
   },
   en: {
+    relNone: 'Relationship (optional)', relAria: 'Relationship', rel_friend: 'Friend', rel_wife: 'Wife', rel_husband: 'Husband', rel_mother: 'Mother', rel_father: 'Father', rel_brother: 'Brother', rel_sister: 'Sister', rel_son: 'Son', rel_daughter: 'Daughter', rel_relative: 'Relative', rel_seller: 'Seller',
     qrShare: 'Share Hawwil', qrShareSub: 'QR code for the app', qrHelp: 'Ask your friend to scan the code with their phone camera and install the app.', qrSave: 'Save / share image', qrCardT: 'Install Hawwil', qrCardS: 'Money transfer helper · Free', qrScan: 'Scan with your phone camera',
     brand: 'Hawwil', themeAria: 'Switch day or night mode', offline: 'Works offline',
     payTo: 'Pay to', driver: 'Driver', merchant: 'Merchant', friend: 'Friend',
