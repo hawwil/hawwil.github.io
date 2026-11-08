@@ -593,7 +593,6 @@ input:focus,input:focus-visible{outline:none}
       <details><summary data-i18n="q5">q5</summary><p data-i18n="a5">a5</p></details>
       <a class="cbtn ig" id="contact" href="#" target="_blank" rel="noopener"><span class="ig-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></span><span><b data-i18n="contact">تابعنا على إنستغرام</b><small>@nexa.ryx</small></span></a>
       <button class="cbtn ig" id="qrBtn" type="button"><span class="ig-ico" style="background:#0f1c2e"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffc20e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h3M21 17v4"/></svg></span><span><b>رمز QR</b><small>شارك حوّل · استقبل الدفع</small></span></button>
-      <a class="cbtn ig" id="statsLink" href="https://hawwil.goatcounter.com/" target="_blank" rel="noopener"><span class="ig-ico" style="background:#0f1c2e"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffc20e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span><span><b>الإحصائيات</b><small>نسخة التجربة فقط</small></span></a>
       <button class="cbtn" id="bkBtn" type="button" data-i18n="bkBtn">نسخ احتياطي واسترجاع</button>
       <button class="cbtn" id="hardRefresh" type="button" data-i18n="hardRef">تحديث التطبيق (مسح الكاش)</button>
       <button class="cbtn" id="report" type="button" data-i18n="reportBtn">بلّغ عن مشكلة</button>
@@ -2697,11 +2696,10 @@ function flushEv() {
   store('evq', '[]');
   q.slice(0, 200).forEach(function (n) { try { window.goatcounter.count({ path: n, title: n, event: true }); } catch (e) {} });
 }
-function track(name) { return; }
-function track_off(name) { var q = evq(); q.push(name); store('evq', JSON.stringify(q.slice(-200))); flushEv(); }
+function track(name) { var q = evq(); q.push(name); store('evq', JSON.stringify(q.slice(-200))); flushEv(); }
 (function () {
   if (!/^https?:$/.test(location.protocol)) return;
-
+  if (!navigator.onLine) track('offline-open');
   function loadGC() {
     if (document.getElementById('gcjs')) return;
     window.goatcounter = { endpoint: 'https://hawwil.goatcounter.com/count' };
@@ -2709,7 +2707,8 @@ function track_off(name) { var q = evq(); q.push(name); store('evq', JSON.string
     sc.onload = function () { gcReady = true; setTimeout(flushEv, 800); };
     document.head.appendChild(sc);
   }
-
+  if (navigator.onLine) loadGC();
+  window.addEventListener('online', loadGC);
 })();
 
 // ----- تشغيل بدون إنترنت + إشعار التحديث -----
