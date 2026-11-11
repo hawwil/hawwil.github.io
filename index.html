@@ -2,6 +2,41 @@
 <!-- © 2026 NEXA Digital Services (@nexa.ryx). جميع الحقوق محفوظة. All rights reserved. Copying, reproducing or reselling this code or design without written permission is prohibited. -->
 <html lang="ar" dir="rtl">
 <head>
+<script>
+/* انتقال حوّل إلى hawwil.nexa-ps.com: لو في إنترنت والرابط الجديد شغّال بينقل المستخدم ومعه سجله. بدون إنترنت بيضل التطبيق شغّال هنا. */
+(function () {
+  var NEW = 'https://hawwil.nexa-ps.com/';
+  if (location.hostname !== 'hawwil.github.io') return;
+  if (location.pathname.indexOf('/hawwil-test') === 0) return;
+  if (!navigator.onLine) return;
+  var K = ['hist', 'book', 'rhide', 'rpin', 'quick', 'sim', 'method', 'to', 'pf'];
+  function b64u(b) { var s = ''; for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function pack(t) {
+    var raw = new TextEncoder().encode(t);
+    if (window.CompressionStream) {
+      return new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer().then(function (ab) { return 'z' + b64u(new Uint8Array(ab)); }, function () { return 'p' + b64u(raw); });
+    }
+    return Promise.resolve('p' + b64u(raw));
+  }
+  function go(url) { try { localStorage.setItem('moved', '1'); } catch (e) {} location.replace(url); }
+  function run() {
+    var done = false;
+    function ok() {
+      if (done) return; done = true;
+      var h = location.hash || '';
+      if (h.indexOf('#bk=') === 0) { go(NEW + h); return; }
+      var moved = null, d = {}, n = 0;
+      try { moved = localStorage.getItem('moved'); K.forEach(function (k) { var v = localStorage.getItem(k); if (v) { d[k] = v; n++; } }); } catch (e) {}
+      if (moved || !n) { go(NEW); return; }
+      pack(JSON.stringify({ hawwil: 1, d: d })).then(function (c) { var u = NEW + '#bk=' + c; go(u.length < 20000 ? u : NEW); }, function () { go(NEW); });
+    }
+    var t = setTimeout(function () { done = true; }, 5000);
+    try { fetch(NEW + 'manifest.webmanifest', { mode: 'no-cors', cache: 'no-store' }).then(function () { clearTimeout(t); ok(); }, function () { clearTimeout(t); }); } catch (e) { clearTimeout(t); }
+  }
+  run();
+})();
+</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f1c2e">
