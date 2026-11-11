@@ -203,6 +203,11 @@ details p{margin:0 0 12px;color:var(--muted);font-size:14px}
 .aeye[aria-pressed="true"]{color:var(--ink)}
 .awarn{margin:14px 0 16px;padding:10px 12px;border-radius:12px;background:rgba(255,194,14,.14);border:1px solid rgba(255,194,14,.4);font-size:13px;line-height:1.6}
 .awho{margin:0;text-align:center;font-size:20px;font-weight:800;word-break:break-all}
+.alink{display:block;margin:12px auto 0;background:none;border:0;color:var(--brand,#0b7a75);font:inherit;font-size:14px;font-weight:700;text-decoration:underline;cursor:pointer;padding:6px}
+.rcode{direction:ltr;text-align:center;font:700 26px/1.3 ui-monospace,Menlo,Consolas,monospace;letter-spacing:2px;background:var(--bg);border:2px dashed var(--line);border-radius:16px;padding:18px 10px;margin:14px 0;user-select:all;-webkit-user-select:all;word-break:break-all}
+.rpass{direction:ltr;text-align:center;font:700 20px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:14px 10px;margin:12px 0;user-select:all;-webkit-user-select:all;word-break:break-all}
+.rstate{margin:4px auto 14px;width:max-content;max-width:100%;padding:5px 12px;border-radius:99px;font-size:12px;font-weight:700;text-align:center;background:rgba(255,194,14,.18);color:#9a6b00}
+.rstate.ok{background:rgba(40,180,99,.15);color:#1f9d57}
 .achip{margin:8px auto 18px;width:max-content;max-width:100%;padding:5px 12px;border-radius:99px;background:rgba(40,180,99,.15);color:#1f9d57;font-size:12px;font-weight:700;text-align:center}
 .acmsg{min-height:22px;margin:4px 0 12px;text-align:center;font-weight:700}
 .recent{margin:0 0 10px}.rlbl{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:0 2px 6px}
@@ -519,16 +524,49 @@ input:focus,input:focus-visible{outline:none}
         <span class="ahint" data-i18n="acUserH">حروف أو أرقام أو الاتنين، بدون مسافات</span>
         <label class="alab" for="acPass" data-i18n="acPassL">الباسورد</label>
         <div class="apw"><input class="ain" id="acPass" type="password" maxlength="64" autocomplete="off" dir="ltr" data-i18n-ph="acPass" placeholder="٦ أحرف أو أكتر"><button class="aeye" id="acEye" type="button" data-i18n-aria="acEye" aria-label="إظهار الباسورد"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
-        <p class="awarn" data-i18n="acWarn">إذا نسيت الباسورد ما في طريقة نرجّع بياناتك، اكتبه بمكان آمن. وما تستخدم باسورد البنك أو المحفظة.</p>
+        <p class="awarn" data-i18n="acWarn">لما تعمل الحساب بيطلعلك رمز استرجاع، احفظه منيح، فيه بترجّع الباسورد إذا نسيته. وما تستخدم باسورد البنك أو المحفظة.</p>
         <button class="go" id="acLogin" type="button" data-i18n="acLogin">دخول</button>
         <button class="ghost" id="acReg" type="button" style="margin-top:10px" data-i18n="acReg">إنشاء حساب جديد</button>
+        <button class="alink" id="acForgot" type="button" data-i18n="rcForgot">نسيت الباسورد؟</button>
+      </div>
+      <div class="acard" id="acRec" hidden>
+        <h3 style="margin:0 0 6px;font-size:17px" data-i18n="rcTitle">استرجاع الباسورد</h3>
+        <p class="adesc" data-i18n="rcDesc">اكتب اسم المستخدم ورمز الاسترجاع اللي طلعلك لما عملت الحساب.</p>
+        <label class="alab" for="rcUser" data-i18n="acUserL">اسم المستخدم</label>
+        <input class="ain" id="rcUser" type="text" maxlength="24" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" dir="ltr">
+        <label class="alab" for="rcCodeIn" data-i18n="rcCodeL">رمز الاسترجاع</label>
+        <input class="ain" id="rcCodeIn" type="text" maxlength="20" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" dir="ltr" placeholder="XXXX-XXXX-XXXX" style="text-align:center;letter-spacing:2px;font-weight:700">
+        <button class="go" id="rcGo" type="button" style="margin-top:16px" data-i18n="rcGo">استرجع الباسورد</button>
+        <div id="rcFound" hidden>
+          <p class="adesc" style="margin-top:16px" data-i18n="rcFoundL">الباسورد تبعك هو:</p>
+          <div class="rpass" id="rcPassOut"></div>
+          <button class="go" id="rcLogin" type="button" data-i18n="rcLogin">ادخل لحسابي</button>
+        </div>
+        <button class="alink" id="rcBack" type="button" data-i18n="rcBack">رجوع لتسجيل الدخول</button>
+      </div>
+      <div class="acard" id="acCode" hidden>
+        <h3 style="margin:0 0 6px;font-size:17px" data-i18n="rcSaveT">احفظ رمز الاسترجاع</h3>
+        <p class="adesc" data-i18n="rcSaveD">إذا نسيت الباسورد، بهاد الرمز بترجّعه. صوّر الشاشة أو انسخه واحفظه بمكان آمن. ما رح يطلع مرة ثانية.</p>
+        <div class="rcode" id="rcCodeOut"></div>
+        <button class="ghost" id="rcCopy" type="button" data-i18n="rcCopy">انسخ الرمز</button>
+        <button class="ghost" id="rcShare" type="button" style="margin-top:10px" data-i18n="rcShare">احفظه برسالة لنفسك</button>
+        <button class="go" id="rcDone" type="button" style="margin-top:14px" data-i18n="rcDone">حفظته، كمّل</button>
+      </div>
+      <div class="acard" id="acMk" hidden>
+        <h3 style="margin:0 0 6px;font-size:17px" data-i18n="rcMkT">رمز استرجاع جديد</h3>
+        <p class="adesc" data-i18n="rcMkD">اكتب الباسورد تبعك عشان نعمل رمز الاسترجاع.</p>
+        <div class="apw"><input class="ain" id="rcMkPass" type="password" maxlength="64" autocomplete="off" dir="ltr"></div>
+        <button class="go" id="rcMkGo" type="button" style="margin-top:14px" data-i18n="rcMkGo">اعمل الرمز</button>
+        <button class="alink" id="rcMkBack" type="button" data-i18n="back">رجوع</button>
       </div>
       <div class="acard" id="acIn" hidden>
         <div class="aic big" id="acAv">A</div>
         <p class="awho" id="acWho"></p>
         <p class="achip" data-i18n="acAuto">المزامنة شغالة تلقائياً</p>
+        <p class="rstate" id="rcState"></p>
         <button class="go" id="acPush" type="button" data-i18n="acPush">احفظ على حسابي الآن</button>
         <button class="ghost" id="acPull" type="button" style="margin-top:10px" data-i18n="acPull">اجلب من حسابي</button>
+        <button class="ghost" id="acMkBtn" type="button" style="margin-top:10px" data-i18n="rcMkBtn">رمز الاسترجاع</button>
         <button class="ghost" id="acLogout" type="button" style="margin-top:10px" data-i18n="acLogout">تسجيل خروج</button>
       </div>
       <p class="note acmsg" id="acMsg" role="status"></p>
@@ -2309,7 +2347,7 @@ $('back').addEventListener('click', function () {
 var I18N = {
   ar: {
     ph_restaurants: 'ابحث عن مطعم', ph_cafes: 'ابحث عن كافيه', ph_pharmacies: 'ابحث عن صيدلية', ph_library: 'ابحث عن مكتبة', ph_meats: 'ابحث عن محل لحوم', ph_clothes: 'ابحث عن محل ملابس أو أحذية', ph_packaging: 'ابحث عن مستلزمات تغليف', ph_gateaux: 'ابحث عن محل جاتوهات', ph_supermarkets: 'ابحث عن سوبرماركت', ph_offices: 'ابحث عن مكتب', ph_taxis: 'ابحث عن مكتب تاكسيات', ph_malls: 'ابحث عن مول', ph_delivery: 'ابحث عن شركة توصيل', ph_stands: 'ابحث عن بسطة',
-    acOutWarn: 'ما قدرنا نحفظ بياناتك على الحساب (مافي إنترنت). لو طلعت هلأ رح تنمسح تحويلات هذا الجوال. تكمّل؟', acBtn: 'حسابي (تسجيل دخول)', acTitle: 'حسابي', acDesc: 'سجّل دخول وسجلك والمفضلة بيظهروا من أي جهاز. بياناتك بتتشفّر بجوالك قبل ما تنحفظ.', acUser: 'اكتب اسم المستخدم', acUserL: 'اسم المستخدم', acUserH: 'حروف أو أرقام أو الاتنين، بدون مسافات', acPassL: 'الباسورد', acPass: '٦ أحرف أو أكتر', acEye: 'إظهار الباسورد', acAuto: 'المزامنة شغالة تلقائياً', acWarn: 'إذا نسيت الباسورد ما في طريقة نرجّع بياناتك، اكتبه بمكان آمن. وما تستخدم باسورد البنك أو المحفظة.', acLogin: 'دخول', acReg: 'إنشاء حساب جديد', acPush: 'احفظ على حسابي الآن', acPull: 'اجلب من حسابي', acLogout: 'تسجيل خروج', acWho: 'داخل باسم: {u}', acFill: 'اكتب اسم المستخدم والباسورد (الباسورد 6 أحرف أو أكتر)', acBusy: 'لحظة...', acTaken: 'اسم المستخدم هاد مأخوذ، جرّب غيره', acBad: 'اسم المستخدم أو الباسورد مش صح', acNet: 'ما زبط الاتصال، تأكد من الإنترنت', acSaved: 'انحفظ على حسابك', acPulled: 'انجلبت بياناتك', acCreated: 'انعمل الحساب. بياناتك رح تنحفظ لحالها', acNoCrypto: 'المتصفح ما بيدعم التشفير', acOutDone: 'تم تسجيل الخروج. بياناتك بقيت على الجهاز',
+    acOutWarn: 'ما قدرنا نحفظ بياناتك على الحساب (مافي إنترنت). لو طلعت هلأ رح تنمسح تحويلات هذا الجوال. تكمّل؟', acBtn: 'حسابي (تسجيل دخول)', acTitle: 'حسابي', acDesc: 'سجّل دخول وسجلك والمفضلة بيظهروا من أي جهاز. بياناتك بتتشفّر بجوالك قبل ما تنحفظ.', acUser: 'اكتب اسم المستخدم', acUserL: 'اسم المستخدم', acUserH: 'حروف أو أرقام أو الاتنين، بدون مسافات', acPassL: 'الباسورد', acPass: '٦ أحرف أو أكتر', acEye: 'إظهار الباسورد', acAuto: 'المزامنة شغالة تلقائياً', acWarn: 'إذا نسيت الباسورد ما في طريقة نرجّع بياناتك، اكتبه بمكان آمن. وما تستخدم باسورد البنك أو المحفظة.', acLogin: 'دخول', acReg: 'إنشاء حساب جديد', acPush: 'احفظ على حسابي الآن', acPull: 'اجلب من حسابي', acLogout: 'تسجيل خروج', acWho: 'داخل باسم: {u}', acFill: 'اكتب اسم المستخدم والباسورد (الباسورد 6 أحرف أو أكتر)', acBusy: 'لحظة...', acTaken: 'اسم المستخدم هاد مأخوذ، جرّب غيره', acBad: 'اسم المستخدم أو الباسورد مش صح', acNet: 'ما زبط الاتصال، تأكد من الإنترنت', acSaved: 'انحفظ على حسابك', acPulled: 'انجلبت بياناتك', acCreated: 'انعمل الحساب. بياناتك رح تنحفظ لحالها', acNoCrypto: 'المتصفح ما بيدعم التشفير', acOutDone: 'تم تسجيل الخروج. بياناتك بقيت على الجهاز', rcForgot: 'نسيت الباسورد؟', rcTitle: 'استرجاع الباسورد', rcDesc: 'اكتب اسم المستخدم ورمز الاسترجاع اللي طلعلك لما عملت الحساب.', rcCodeL: 'رمز الاسترجاع', rcGo: 'استرجع الباسورد', rcFoundL: 'الباسورد تبعك هو:', rcLogin: 'ادخل لحسابي', rcBack: 'رجوع لتسجيل الدخول', rcSaveT: 'احفظ رمز الاسترجاع', rcSaveD: 'إذا نسيت الباسورد، بهاد الرمز بترجّعه. صوّر الشاشة أو انسخه واحفظه بمكان آمن. ما رح يطلع مرة ثانية.', rcCopy: 'انسخ الرمز', rcShare: 'احفظه برسالة لنفسك', rcDone: 'حفظته، كمّل', rcMkT: 'رمز استرجاع جديد', rcMkD: 'اكتب الباسورد تبعك عشان نعمل رمز الاسترجاع.', rcMkGo: 'اعمل الرمز', rcMkBtn: 'رمز الاسترجاع', rcHas: 'عندك رمز استرجاع ✓', rcNone: 'ما عملت رمز استرجاع لسا', rcFill: 'اكتب اسم المستخدم ورمز الاسترجاع', rcBadCode: 'الرمز أو اسم المستخدم مش صح', rcCopied: 'انتسخ الرمز', rcShareTxt: 'رمز استرجاع حساب حوّل ({u}): {c}', rcFail: 'ما قدرنا نعمل رمز الاسترجاع هلأ، اعمله بعدين من حسابي', acWarn: 'لما تعمل الحساب بيطلعلك رمز استرجاع، احفظه منيح، فيه بترجّع الباسورد إذا نسيته. وما تستخدم باسورد البنك أو المحفظة.',
     bkLink: 'شارك رابط الاسترجاع', bkLinkCopied: 'انتسخ الرابط. الصقه بالواتساب لحالك، وافتحه بالجهاز التاني.', bkTooBig: 'البيانات كبيرة للرابط. استخدم زر انسخ بياناتي.', bkAskT: 'استرجاع البيانات؟', bkAskP: 'هاد الرابط فيه سجل تحويلات ومفضلة. إذا كمّلت، بتستبدل اللي موجود بهالجهاز.', bkAskGo: 'استرجاع', bkAskNo: 'إلغاء', bkLinkBad: 'رابط الاسترجاع مش صحيح.',
     bkBtn: 'نسخ احتياطي واسترجاع', bkTitle: 'نسخ احتياطي', bkDesc: 'بتنقل سجل تحويلاتك والمفضلة لجوال تاني أو لتطبيق التثبيت: انسخ بياناتك من هنا، وافتح حوّل بالمكان التاني، والصق النص واضغط استرجاع.', bkCopy: 'انسخ بياناتي', bkPlace: 'هنا بيطلع النص، أو الصق النص اللي نسخته من جهاز تاني', bkRestore: 'استرجاع من النص', bkConfirm: 'اضغط مرة تانية للتأكيد (بيستبدل اللي موجود هنا)', bkCopied: 'انتسخ النص. الصقه بالمكان التاني.', bkShown: 'هاد النص، انسخه بإيدك.', bkBad: 'النص مش صحيح.', bkDone: 'تم الاسترجاع.', bkEmpty: 'ما في بيانات للنسخ.',
     restPayBtn: 'ادفع',     restMerchNo: 'رقم التاجر:',     relNone: 'العلاقة (اختياري)', relAria: 'العلاقة', rel_friend: 'صديق', rel_wife: 'زوجة', rel_husband: 'زوج', rel_mother: 'أم', rel_father: 'أب', rel_brother: 'أخ', rel_sister: 'أخت', rel_son: 'ابن', rel_daughter: 'بنت', rel_relative: 'قريب', rel_seller: 'بائع',
@@ -2352,7 +2390,7 @@ var I18N = {
   },
   en: {
     ph_restaurants: 'Search restaurants', ph_cafes: 'Search cafes', ph_pharmacies: 'Search pharmacies', ph_library: 'Search bookstores', ph_meats: 'Search meat shops', ph_clothes: 'Search clothing or shoe stores', ph_packaging: 'Search packaging shops', ph_gateaux: 'Search cake shops', ph_supermarkets: 'Search supermarkets', ph_offices: 'Search offices', ph_taxis: 'Search taxi offices', ph_malls: 'Search malls', ph_delivery: 'Search delivery companies', ph_stands: 'Search stands',
-    acOutWarn: 'Could not save your data to the account (offline). Signing out now will erase this phone\'s history. Continue?', acBtn: 'My account (sign in)', acTitle: 'My account', acDesc: 'Sign in and your history and favorites show up on any device. Your data is encrypted on your phone before it is saved.', acUser: 'Enter your username', acUserL: 'Username', acUserH: 'Letters, numbers or both, no spaces', acPassL: 'Password', acPass: '6+ characters', acEye: 'Show password', acAuto: 'Auto-sync is on', acWarn: 'If you forget the password we cannot recover your data. Keep it somewhere safe, and never reuse a bank or wallet password.', acLogin: 'Sign in', acReg: 'Create new account', acPush: 'Save to my account now', acPull: 'Fetch from my account', acLogout: 'Sign out', acWho: 'Signed in as: {u}', acFill: 'Enter username and password (6+ characters)', acBusy: 'One moment...', acTaken: 'That username is taken, try another', acBad: 'Wrong username or password', acNet: 'Could not connect, check your internet', acSaved: 'Saved to your account', acPulled: 'Your data was fetched', acCreated: 'Account created. Your data will save automatically', acNoCrypto: 'This browser does not support encryption', acOutDone: 'Signed out. Your data stays on this device',
+    acOutWarn: 'Could not save your data to the account (offline). Signing out now will erase this phone\'s history. Continue?', acBtn: 'My account (sign in)', acTitle: 'My account', acDesc: 'Sign in and your history and favorites show up on any device. Your data is encrypted on your phone before it is saved.', acUser: 'Enter your username', acUserL: 'Username', acUserH: 'Letters, numbers or both, no spaces', acPassL: 'Password', acPass: '6+ characters', acEye: 'Show password', acAuto: 'Auto-sync is on', acWarn: 'If you forget the password we cannot recover your data. Keep it somewhere safe, and never reuse a bank or wallet password.', acLogin: 'Sign in', acReg: 'Create new account', acPush: 'Save to my account now', acPull: 'Fetch from my account', acLogout: 'Sign out', acWho: 'Signed in as: {u}', acFill: 'Enter username and password (6+ characters)', acBusy: 'One moment...', acTaken: 'That username is taken, try another', acBad: 'Wrong username or password', acNet: 'Could not connect, check your internet', acSaved: 'Saved to your account', acPulled: 'Your data was fetched', acCreated: 'Account created. Your data will save automatically', acNoCrypto: 'This browser does not support encryption', acOutDone: 'Signed out. Your data stays on this device', rcForgot: 'Forgot password?', rcTitle: 'Recover password', rcDesc: 'Enter your username and the recovery code you got when you created the account.', rcCodeL: 'Recovery code', rcGo: 'Recover password', rcFoundL: 'Your password is:', rcLogin: 'Sign in to my account', rcBack: 'Back to sign in', rcSaveT: 'Save your recovery code', rcSaveD: 'If you forget your password, this code brings it back. Take a screenshot or copy it somewhere safe. It will not be shown again.', rcCopy: 'Copy code', rcShare: 'Send it to myself', rcDone: 'I saved it, continue', rcMkT: 'New recovery code', rcMkD: 'Enter your password to create a recovery code.', rcMkGo: 'Create code', rcMkBtn: 'Recovery code', rcHas: 'Recovery code set ✓', rcNone: 'No recovery code yet', rcFill: 'Enter your username and recovery code', rcBadCode: 'Wrong code or username', rcCopied: 'Code copied', rcShareTxt: 'Hawwil account recovery code ({u}): {c}', rcFail: 'Could not create a recovery code now, create it later from My account', acWarn: 'When you create an account you get a recovery code. Keep it safe, it brings back your password if you forget it. Never reuse a bank or wallet password.',
     bkLink: 'Share restore link', bkLinkCopied: 'Link copied. Paste it in WhatsApp to yourself and open it on the other device.', bkTooBig: 'Too much data for a link. Use Copy my data.', bkAskT: 'Restore data?', bkAskP: 'This link has your history and favorites. If you continue, it replaces what is on this device.', bkAskGo: 'Restore', bkAskNo: 'Cancel', bkLinkBad: 'The restore link is not valid.',
     bkBtn: 'Backup & restore', bkTitle: 'Backup', bkDesc: 'Move your history and favorites to another phone or the installed app: copy your data here, open Hawwil on the other side, paste the text and tap restore.', bkCopy: 'Copy my data', bkPlace: 'The text appears here, or paste text copied from another device', bkRestore: 'Restore from text', bkConfirm: 'Tap again to confirm (replaces what is here)', bkCopied: 'Copied. Paste it on the other side.', bkShown: 'Here is the text. Copy it manually.', bkBad: 'The text is not valid.', bkDone: 'Restored.', bkEmpty: 'No data to copy.',
     restPayBtn: 'Pay',     restMerchNo: 'Merchant number:',     relNone: 'Relationship (optional)', relAria: 'Relationship', rel_friend: 'Friend', rel_wife: 'Wife', rel_husband: 'Husband', rel_mother: 'Mother', rel_father: 'Father', rel_brother: 'Brother', rel_sister: 'Sister', rel_son: 'Son', rel_daughter: 'Daughter', rel_relative: 'Relative', rel_seller: 'Seller',
@@ -3105,7 +3143,7 @@ var acS = null, acTimer = 0, acBlock = false;
 function acLoad() { try { var s = JSON.parse(load('acct') || 'null'); acS = (s && s.id && s.k && s.key) ? s : null; } catch (e) { acS = null; } }
 function acMsg(t) { $('acMsg').textContent = t || ''; }
 function acView() {
-  $('acOut').hidden = !!acS; $('acIn').hidden = !acS; $('acTop').classList.toggle('on', !!acS);
+  acCards(acS ? 'acIn' : 'acOut'); $('acTop').classList.toggle('on', !!acS); rcStateView();
   if (acS) { $('acWho').textContent = acS.u; $('acAv').textContent = acS.u.charAt(0).toUpperCase(); }
 }
 function hex(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
@@ -3186,7 +3224,49 @@ function acPull(force) {   // force = جلب كامل (دخول أو زر اجل
     return acDecrypt(acS, r.d).then(function (t) { var ch = acMerge(t, true); acSaveSession(Date.now()); return ch; });
   });
 }
-function acErr(e) { var m = e && e.message; acMsg(tr(m === 'taken' ? 'acTaken' : m === 'auth' ? 'acBad' : m === 'nocrypto' ? 'acNoCrypto' : 'acNet')); }
+// ----- رمز الاسترجاع: سجل مخفي على نفس السيرفر، مشفّر بالرمز، فيه الباسورد -----
+var RC_AB = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function rcNorm(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+function rcFmt(c) { return c.replace(/(.{4})(?=.)/g, '$1-'); }
+function rcGen() {
+  var out = '', b = new Uint8Array(1);
+  while (out.length < 12) { crypto.getRandomValues(b); if (b[0] < 248) out += RC_AB.charAt(b[0] % 31); }
+  return out;
+}
+function rcDerive(user, code) { var c = rcNorm(code); return acDerive('rec~' + user.trim().toLowerCase() + '~' + c, c); }
+function rcCreate(user, pass) {
+  var code = rcGen();
+  return rcDerive(user, code).then(function (r) {
+    return acCall('/register', { u: r.id, k: r.k }).then(function (x) {
+      if (!x.ok) throw new Error(x.e || 'net');
+      return acEncrypt(r, JSON.stringify({ hawwilRec: 1, u: user.trim(), p: pass }));
+    }).then(function (d) { return acCall('/save', { u: r.id, k: r.k, d: d }); }).then(function (x) {
+      if (!x.ok) throw new Error(x.e || 'net');
+      if (acS) { acS.rc = 1; store('acct', JSON.stringify(acS)); }
+      return code;
+    });
+  });
+}
+function rcFind(user, code) {
+  return rcDerive(user, code).then(function (r) {
+    return acCall('/login', { u: r.id, k: r.k }).then(function (x) {
+      if (!x.ok || !x.d) throw new Error(x.status && x.status < 500 ? 'badrec' : 'net');
+      return acDecrypt(r, x.d);
+    }).then(function (t) { var o = JSON.parse(t); if (!o || o.hawwilRec !== 1 || !o.p) throw new Error('badrec'); return o; });
+  });
+}
+var rcAfter = null;
+function acCards(which) { ['acOut', 'acIn', 'acRec', 'acCode', 'acMk'].forEach(function (id) { $(id).hidden = id !== which; }); }
+function rcShowCode(code, user, after) {
+  rcAfter = after || null;
+  $('rcCodeOut').textContent = rcFmt(code); $('rcCodeOut').dataset.u = user;
+  acMsg(''); acCards('acCode');
+}
+function rcStateView() {
+  var el = $('rcState'); if (!el) return;
+  var has = !!(acS && acS.rc); el.textContent = tr(has ? 'rcHas' : 'rcNone'); el.classList.toggle('ok', has);
+}
+function acErr(e) { var m = e && e.message; acMsg(tr(m === 'taken' ? 'acTaken' : m === 'auth' ? 'acBad' : m === 'badrec' ? 'rcBadCode' : m === 'nocrypto' ? 'acNoCrypto' : 'acNet')); }
 function acGo(reg) {
   var u = $('acUser').value.trim(), p = $('acPass').value;
   if (!u || p.length < 6) { acMsg(tr('acFill')); return; }
@@ -3196,7 +3276,13 @@ function acGo(reg) {
     return step.then(function () { acS = s; return acPull(true); }).then(function () {
       store('acct', JSON.stringify(acS)); $('acPass').value = '';
       return acPushNow();
-    }).then(function () { acView(); acMsg(tr(reg ? 'acCreated' : 'acPulled')); setTimeout(function () { location.reload(); }, 900); });
+    }).then(function () {
+      acView(); acMsg(tr(reg ? 'acCreated' : 'acPulled'));
+      if (!reg) { setTimeout(function () { location.reload(); }, 900); return; }
+      return rcCreate(u, p).then(function (code) {
+        rcShowCode(code, u, function () { location.reload(); });
+      }, function () { toast(tr('rcFail'), 4000); setTimeout(function () { location.reload(); }, 1500); });
+    });
   }).catch(function (e) { acS = null; acErr(e); });
 }
 $('acUser').addEventListener('input', function () { var v = this.value.replace(/[^\p{L}\p{N}._-]/gu, ''); if (v !== this.value) this.value = v; });
@@ -3205,6 +3291,41 @@ var acFrom = 'help';
 $('acBack').addEventListener('click', function () { show(acFrom); });
 $('acTop').addEventListener('click', function () { acFrom = 'form'; acLoad(); acMsg(''); acView(); show('ac'); });
 $('acLogin').addEventListener('click', function () { acGo(false); });
+$('acForgot').addEventListener('click', function () { $('rcUser').value = $('acUser').value.trim(); $('rcCodeIn').value = ''; $('rcFound').hidden = true; acMsg(''); acCards('acRec'); });
+$('rcBack').addEventListener('click', function () { acMsg(''); acView(); });
+$('rcUser').addEventListener('input', function () { var v = this.value.replace(/[^\p{L}\p{N}._-]/gu, ''); if (v !== this.value) this.value = v; });
+$('rcCodeIn').addEventListener('input', function () { var v = this.value.toUpperCase(); if (v !== this.value) this.value = v; });
+$('rcGo').addEventListener('click', function () {
+  var u = $('rcUser').value.trim(), c = rcNorm($('rcCodeIn').value);
+  if (!u || c.length !== 12) { acMsg(tr('rcFill')); return; }
+  acMsg(tr('acBusy')); $('rcFound').hidden = true;
+  rcFind(u, c).then(function (o) { acMsg(''); $('rcPassOut').textContent = o.p; $('rcFound').hidden = false; $('rcFound').dataset.u = o.u || u; }).catch(acErr);
+});
+$('rcLogin').addEventListener('click', function () {
+  $('acUser').value = $('rcFound').dataset.u || $('rcUser').value.trim(); $('acPass').value = $('rcPassOut').textContent;
+  acCards('acOut'); acGo(false);
+});
+$('rcCopy').addEventListener('click', function () {
+  var t = $('rcCodeOut').textContent;
+  try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(function () { toast(tr('rcCopied')); }, function () {}); return; } } catch (e) {}
+  toast(tr('rcCopied'));
+});
+$('rcShare').addEventListener('click', function () {
+  var t = tr('rcShareTxt').replace('{u}', $('rcCodeOut').dataset.u || '').replace('{c}', $('rcCodeOut').textContent);
+  if (navigator.share) { navigator.share({ text: t }).catch(function () {}); return; }
+  try { navigator.clipboard.writeText(t).then(function () { toast(tr('rcCopied')); }); } catch (e) {}
+});
+$('rcDone').addEventListener('click', function () { var f = rcAfter; rcAfter = null; if (f) f(); else { acView(); } });
+$('acMkBtn').addEventListener('click', function () { $('rcMkPass').value = ''; acMsg(''); acCards('acMk'); setTimeout(function () { $('rcMkPass').focus(); }, 100); });
+$('rcMkBack').addEventListener('click', function () { acMsg(''); acView(); });
+$('rcMkGo').addEventListener('click', function () {
+  var p = $('rcMkPass').value; if (!acS || p.length < 6) { acMsg(tr('acFill')); return; }
+  acMsg(tr('acBusy'));
+  acDerive(acS.u, p).then(function (s) {
+    if (s.k !== acS.k) throw new Error('auth');
+    return rcCreate(acS.u, p);
+  }).then(function (code) { $('rcMkPass').value = ''; rcShowCode(code, acS.u, null); }).catch(acErr);
+});
 $('acReg').addEventListener('click', function () { acGo(true); });
 $('acPush').addEventListener('click', function () { acMsg(tr('acBusy')); acPushNow().then(function (ok) { acMsg(tr(ok ? 'acSaved' : 'acNet')); }).catch(acErr); });
 $('acPull').addEventListener('click', function () { acMsg(tr('acBusy')); acPull(true).then(function () { acMsg(tr('acPulled')); setTimeout(function () { location.reload(); }, 800); }).catch(acErr); });
